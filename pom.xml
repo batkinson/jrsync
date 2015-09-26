@@ -45,6 +45,14 @@
                         <target>1.7</target>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <outputDir>${project.build.directory}</outputDir>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>

@@ -23,6 +23,8 @@ public class BlockSearchTest {
 
     private static final String MD5 = "MD5";
 
+    File outputDir;
+
     RandomAccessFile basis;
     RandomAccessFile target;
     RandomAccessFile violin;
@@ -30,6 +32,10 @@ public class BlockSearchTest {
 
     @Before
     public void setup() throws URISyntaxException, FileNotFoundException {
+
+        outputDir = new File(System.getProperty("outputDir"), "patched-files");
+        outputDir.mkdirs();
+
         basis = openFile("file1.txt");
         target = openFile("file2.txt");
         violin = openFile("violin.jpg");
@@ -51,7 +57,7 @@ public class BlockSearchTest {
     public void execute() throws IOException, NoSuchAlgorithmException {
         for (int blockSize = 1; blockSize <= target.length(); blockSize++) {
             final BlockSearch search = new BlockSearch(describe(basis, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstfile", blockSize, basis, target);
+            FilePatcher patcher = new FilePatcher("bstfile", blockSize, basis, target, outputDir);
             search.execute(target, MD5, patcher);
             assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
             assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
@@ -62,7 +68,7 @@ public class BlockSearchTest {
     public void makeViolinIntoGuitar() throws IOException, NoSuchAlgorithmException {
         for (int blockSize : Arrays.asList(128)) {
             final BlockSearch search = new BlockSearch(describe(violin, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstvig", blockSize, violin, guitar);
+            FilePatcher patcher = new FilePatcher("bstvig", blockSize, violin, guitar, outputDir);
             search.execute(guitar, MD5, patcher);
             assertArrayEquals(computeHash(guitar), computeHash(patcher.getDest()));
             assertEquals(guitar.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
@@ -73,7 +79,7 @@ public class BlockSearchTest {
     public void makeGuitarIntoViolin() throws IOException, NoSuchAlgorithmException {
         for (int blockSize : Arrays.asList(128)) {
             final BlockSearch search = new BlockSearch(describe(guitar, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstgiv", blockSize, guitar, violin);
+            FilePatcher patcher = new FilePatcher("bstgiv", blockSize, guitar, violin, outputDir);
             search.execute(violin, MD5, patcher);
             assertArrayEquals(computeHash(violin), computeHash(patcher.getDest()));
             assertEquals(violin.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
@@ -84,7 +90,7 @@ public class BlockSearchTest {
     public void makeGuitarIntoGuitar() throws IOException, NoSuchAlgorithmException {
         for (int blockSize : Arrays.asList(128)) {
             final BlockSearch search = new BlockSearch(describe(guitar, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstgig", blockSize, guitar, guitar);
+            FilePatcher patcher = new FilePatcher("bstgig", blockSize, guitar, guitar, outputDir);
             search.execute(guitar, MD5, patcher);
             assertArrayEquals(computeHash(guitar), computeHash(patcher.getDest()));
             assertEquals(guitar.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
@@ -105,9 +111,9 @@ class FilePatcher implements SearchHandler {
     private long bytesMatched = 0;
     private long bytesNeeded = 0;
 
-    FilePatcher(String name, int blockSize, RandomAccessFile basis, RandomAccessFile target) throws IOException {
+    FilePatcher(String name, int blockSize, RandomAccessFile basis, RandomAccessFile target, File dest) throws IOException {
         this.blockSize = blockSize;
-        this.dest = new RandomAccessFile(File.createTempFile(name, "", null), "rw");
+        this.dest = new RandomAccessFile(File.createTempFile(name, "", dest), "rw");
         this.basis = basis;
         this.target = target;
     }
