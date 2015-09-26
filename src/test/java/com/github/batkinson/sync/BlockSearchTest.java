@@ -1,4 +1,4 @@
-package com.github.batkinson;
+package com.github.batkinson.sync;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,8 +13,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static com.github.batkinson.BlockDesc.describe;
-import static com.github.batkinson.TestUtils.openFile;
+import static com.github.batkinson.sync.BlockDesc.describe;
+import static com.github.batkinson.sync.TestUtils.openFile;
 import static org.junit.Assert.assertArrayEquals;
 
 public class BlockSearchTest {
@@ -23,18 +23,16 @@ public class BlockSearchTest {
 
     RandomAccessFile basis;
     RandomAccessFile target;
-    RandomAccessFile zeros;
 
     @Before
     public void setup() throws URISyntaxException, FileNotFoundException {
         basis = openFile("file1.txt");
         target = openFile("file2.txt");
-        zeros = openFile("zeros.txt");
     }
 
     @After
     public void teardown() {
-        for (RandomAccessFile f : Arrays.asList(basis, target, zeros)) {
+        for (RandomAccessFile f : Arrays.asList(basis, target)) {
             try {
                 f.close();
             } catch (IOException e) {

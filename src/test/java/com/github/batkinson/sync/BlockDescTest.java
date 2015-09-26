@@ -1,4 +1,4 @@
-package com.github.batkinson;
+package com.github.batkinson.sync;
 
 import org.junit.After;
 import org.junit.Before;
@@ -16,7 +16,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static com.github.batkinson.TestUtils.openFile;
 
 public class BlockDescTest {
 
@@ -28,7 +27,7 @@ public class BlockDescTest {
 
     @Before
     public void setup() throws URISyntaxException, FileNotFoundException {
-        input = openFile("file1.txt");
+        input = TestUtils.openFile("file1.txt");
     }
 
     @After

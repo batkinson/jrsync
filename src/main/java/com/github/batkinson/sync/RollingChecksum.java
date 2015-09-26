@@ -1,4 +1,4 @@
-package com.github.batkinson;
+package com.github.batkinson.sync;
 
 /**
  * Implementation of a rolling checksum as described in https://rsync.samba.org/tech_report/node3.html.

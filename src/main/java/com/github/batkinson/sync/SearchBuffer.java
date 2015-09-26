@@ -1,4 +1,4 @@
-package com.github.batkinson;
+package com.github.batkinson.sync;
 
 /**
  * A uni-directional circular byte buffer that maintains a block and it's checksum.

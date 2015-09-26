@@ -1,4 +1,4 @@
-package com.github.batkinson;
+package com.github.batkinson.sync;
 
 import java.io.File;
 import java.io.FileNotFoundException;
