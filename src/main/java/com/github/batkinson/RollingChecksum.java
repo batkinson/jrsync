@@ -20,14 +20,19 @@ public class RollingChecksum {
 
     public long update(byte prevVal, byte byteVal) {
         if (i <= window) {
-            update(byteVal);
+            add(byteVal);
         } else {
             roll(prevVal, byteVal);
         }
         return getValue();
     }
 
-    private void update(byte value) {
+    public void add(byte value) {
+
+        if (i > window) {
+            throw new IllegalStateException("checksum requires prev start item to roll forward");
+        }
+
         a = (a + value) & MOD_MASK;
         b = (b + ((window - i + 1) * value)) & MOD_MASK;
         i++;
@@ -36,6 +41,16 @@ public class RollingChecksum {
     private void roll(byte prevStart, byte nextEnd) {
         a = ((a - prevStart) + nextEnd) & MOD_MASK;
         b = (b - (window * prevStart) + a) & MOD_MASK;
+    }
+
+    public long start(byte content) {
+
+        if (i != 1) {
+            throw new IllegalStateException("sum already started");
+        }
+
+        add(content);
+        return getValue();
     }
 
     public long start(byte[] content) {
@@ -50,7 +65,7 @@ public class RollingChecksum {
 
         int stopOffset = offset + Math.min(window, content.length - offset);
         for (int j = offset; j < stopOffset; j++) {
-            update(content[j]);
+            add(content[j]);
         }
 
         return getValue();

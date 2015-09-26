@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Describes blocks from the byte stream we wish to use as a copy basis.
  */
-class BlockDesc {
+public class BlockDesc {
 
     long blockIndex;
     long weakChecksum;
