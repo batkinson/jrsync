@@ -6,18 +6,17 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static com.github.batkinson.TestUtils.openFile;
 
 public class BlockDescTest {
 
@@ -29,9 +28,7 @@ public class BlockDescTest {
 
     @Before
     public void setup() throws URISyntaxException, FileNotFoundException {
-        URL url = BlockDescTest.class.getResource("file1.txt");
-        File f = new File(url.toURI());
-        input = new RandomAccessFile(f, "r");
+        input = openFile("file1.txt");
     }
 
     @After
