@@ -58,7 +58,7 @@ public class BlockSearch {
             file.readFully(blockBuf);
             sb.add(blockBuf);
         } catch (EOFException eof) {
-            handler.needsContent(interimStart, file.length());
+            needsContent(handler, interimStart, file.length());
             return;
         }
 
@@ -75,7 +75,7 @@ public class BlockSearch {
             if (match != null) {
                 long nextStart = sb.position() + blockSize;
                 if (interimStart != sb.position()) {
-                    handler.needsContent(interimStart, sb.position());
+                    needsContent(handler, interimStart, sb.position());
                 }
                 // matching block in dest file, communicate match
                 handler.blockMatch(sb.position(), match.blockIndex);
@@ -86,7 +86,7 @@ public class BlockSearch {
                         file.readFully(blockBuf);
                         sb.add(blockBuf);
                     } catch (EOFException eof) {
-                        handler.needsContent(interimStart, file.length());
+                        needsContent(handler, interimStart, file.length());
                         return;
                     }
                 }
@@ -96,10 +96,16 @@ public class BlockSearch {
                     byte next = file.readByte();
                     sb.add(next);
                 } catch (EOFException eof) {
-                    handler.needsContent(interimStart, file.length());
+                    needsContent(handler, interimStart, file.length());
                     return;
                 }
             }
+        }
+    }
+
+    private void needsContent(SearchHandler handler, long start, long end) throws IOException {
+        if (start < end) {
+            handler.needsContent(start, end);
         }
     }
 }
