@@ -25,8 +25,8 @@ public class BlockSearchTest {
 
     File outputDir;
 
-    RandomAccessFile basis;
-    RandomAccessFile target;
+    RandomAccessFile file1;
+    RandomAccessFile file2;
     RandomAccessFile violin;
     RandomAccessFile guitar;
 
@@ -36,15 +36,15 @@ public class BlockSearchTest {
         outputDir = new File(System.getProperty("outputDir"), "patched-files");
         outputDir.mkdirs();
 
-        basis = openFile("file1.txt");
-        target = openFile("file2.txt");
+        file1 = openFile("file1.txt");
+        file2 = openFile("file2.txt");
         violin = openFile("violin.jpg");
         guitar = openFile("guitar.jpg");
     }
 
     @After
     public void teardown() {
-        for (RandomAccessFile f : Arrays.asList(basis, target)) {
+        for (RandomAccessFile f : Arrays.asList(file1, file2)) {
             try {
                 f.close();
             } catch (IOException e) {
@@ -55,46 +55,33 @@ public class BlockSearchTest {
 
     @Test
     public void execute() throws IOException, NoSuchAlgorithmException {
-        for (int blockSize = 1; blockSize <= target.length(); blockSize++) {
-            final BlockSearch search = new BlockSearch(describe(basis, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstfile", blockSize, basis, target, outputDir);
-            search.execute(target, MD5, patcher);
-            assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
-            assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
+        for (int blockSize : Arrays.asList(1, 13, (int)file1.length(), (int)file2.length(), 1100)) {
+            assertPatch(blockSize, "bstfile", file1, file2);
         }
     }
 
     @Test
     public void makeViolinIntoGuitar() throws IOException, NoSuchAlgorithmException {
-        for (int blockSize : Arrays.asList(128)) {
-            final BlockSearch search = new BlockSearch(describe(violin, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstvig", blockSize, violin, guitar, outputDir);
-            search.execute(guitar, MD5, patcher);
-            assertArrayEquals(computeHash(guitar), computeHash(patcher.getDest()));
-            assertEquals(guitar.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
-        }
+        assertPatch(191, "bstvig", violin, guitar);
     }
 
     @Test
     public void makeGuitarIntoViolin() throws IOException, NoSuchAlgorithmException {
-        for (int blockSize : Arrays.asList(128)) {
-            final BlockSearch search = new BlockSearch(describe(guitar, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstgiv", blockSize, guitar, violin, outputDir);
-            search.execute(violin, MD5, patcher);
-            assertArrayEquals(computeHash(violin), computeHash(patcher.getDest()));
-            assertEquals(violin.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
-        }
+        assertPatch(191, "bstgiv", guitar, violin);
     }
 
     @Test
     public void makeGuitarIntoGuitar() throws IOException, NoSuchAlgorithmException {
-        for (int blockSize : Arrays.asList(128)) {
-            final BlockSearch search = new BlockSearch(describe(guitar, blockSize, MD5), blockSize);
-            FilePatcher patcher = new FilePatcher("bstgig", blockSize, guitar, guitar, outputDir);
-            search.execute(guitar, MD5, patcher);
-            assertArrayEquals(computeHash(guitar), computeHash(patcher.getDest()));
-            assertEquals(guitar.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
-        }
+        assertPatch(191, "bstgig", guitar, guitar);
+    }
+
+    private void assertPatch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target)
+            throws IOException, NoSuchAlgorithmException {
+        final BlockSearch search = new BlockSearch(describe(basis, blockSize, MD5), blockSize);
+        FilePatcher patcher = new FilePatcher(name + "-" + blockSize + "-", blockSize, basis, target, outputDir);
+        search.execute(target, MD5, patcher);
+        assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
+        assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
     }
 }
 
