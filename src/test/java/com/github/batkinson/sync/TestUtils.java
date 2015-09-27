@@ -42,16 +42,23 @@ public class TestUtils {
     }
 
     /**
-     * Not to be used with large files, allocates the storage in memory.
+     * Used to verify integrity of copied files, leaving position where it was when it was first
+     * invoked. Handles large files efficiently.
      */
-    public static byte[] computeHash(RandomAccessFile f) throws IOException, NoSuchAlgorithmException {
-        f.seek(0);
-        int read;
-        MessageDigest digest = MessageDigest.getInstance("SHA1");
-        byte[] scratch = new byte[4096];
-        while ( (read = f.read(scratch)) >= 0 ) {
-            digest.update(scratch, 0, read);
+    public static byte[] computeHash(RandomAccessFile f)
+            throws IOException, NoSuchAlgorithmException {
+        long origPos = f.getFilePointer();
+        try {
+            f.seek(0);
+            int read;
+            MessageDigest digest = MessageDigest.getInstance("SHA1");
+            byte[] scratch = new byte[BLOCK_SIZE];
+            while ((read = f.read(scratch)) >= 0) {
+                digest.update(scratch, 0, read);
+            }
+            return digest.digest();
+        } finally {
+            f.seek(origPos);
         }
-        return digest.digest();
     }
 }
