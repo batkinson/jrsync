@@ -14,7 +14,6 @@ import java.util.Arrays;
 
 import static com.github.batkinson.sync.BlockDesc.describe;
 import static com.github.batkinson.sync.TestUtils.computeHash;
-import static com.github.batkinson.sync.TestUtils.fileContent;
 import static com.github.batkinson.sync.TestUtils.openFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

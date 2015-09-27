@@ -11,6 +11,8 @@ import java.security.NoSuchAlgorithmException;
 
 public class TestUtils {
 
+    public static final int BLOCK_SIZE = 4096;
+
     /**
      * Opens the named file from the first match in same package as this class. Used for test files.
      */
@@ -24,15 +26,18 @@ public class TestUtils {
      * Gets the specified section of the file as a byte array, then returns the file to its previous
      * position.
      */
-    public static byte[] fileContent(RandomAccessFile f, long start, long end) throws IOException {
-        long origPos = f.getFilePointer();
+    public static void writeContent(RandomAccessFile source, long start, long end, RandomAccessFile dest) throws IOException {
+        long origPos = source.getFilePointer();
         try {
-            f.seek(start);
-            byte[] bytes = new byte[(int) (end - start)];
-            f.readFully(bytes);
-            return bytes;
+            source.seek(start);
+            int read, scratchSize = BLOCK_SIZE, remaining = (int)(end - start) ;
+            byte[] scratch = new byte[scratchSize];
+            while ( remaining > 0 && (read = source.read(scratch, 0, Math.min(scratchSize, remaining))) >= 0 ) {
+                dest.write(scratch, 0, read);
+                remaining -= read;
+            }
         } finally {
-            f.seek(origPos);
+            source.seek(origPos);
         }
     }
 
@@ -41,10 +46,12 @@ public class TestUtils {
      */
     public static byte[] computeHash(RandomAccessFile f) throws IOException, NoSuchAlgorithmException {
         f.seek(0);
-        byte[] content = new byte[(int)f.length()];
-        f.readFully(content);
-        return MessageDigest.getInstance("SHA1").digest(content);
+        int read;
+        MessageDigest digest = MessageDigest.getInstance("SHA1");
+        byte[] scratch = new byte[4096];
+        while ( (read = f.read(scratch)) >= 0 ) {
+            digest.update(scratch, 0, read);
+        }
+        return digest.digest();
     }
-
-
 }

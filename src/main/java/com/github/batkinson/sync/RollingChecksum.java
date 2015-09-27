@@ -43,16 +43,6 @@ public class RollingChecksum {
         b = (b - (window * prevStart) + a) & MOD_MASK;
     }
 
-    public long start(byte content) {
-
-        if (i != 1) {
-            throw new IllegalStateException("sum already started");
-        }
-
-        add(content);
-        return getValue();
-    }
-
     public long start(byte[] content) {
         return start(content, 0);
     }

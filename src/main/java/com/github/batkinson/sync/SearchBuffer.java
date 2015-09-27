@@ -35,10 +35,6 @@ class SearchBuffer {
         return capacity;
     }
 
-    public int blockSize() {
-        return blockSize;
-    }
-
     private int offset(int index) {
         return (offset + index) % capacity;
     }
