@@ -14,7 +14,7 @@ import java.util.Arrays;
 
 import static com.github.batkinson.sync.BlockDesc.describe;
 import static com.github.batkinson.sync.TestUtils.computeHash;
-import static com.github.batkinson.sync.TestUtils.openFile;
+import static com.github.batkinson.sync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -35,10 +35,10 @@ public class BlockSearchTest {
         outputDir = new File(System.getProperty("outputDir"), "patched-files");
         outputDir.mkdirs();
 
-        file1 = openFile("file1.txt");
-        file2 = openFile("file2.txt");
-        violin = openFile("violin.jpg");
-        guitar = openFile("guitar.jpg");
+        file1 = testFile("file1.txt");
+        file2 = testFile("file2.txt");
+        violin = testFile("violin.jpg");
+        guitar = testFile("guitar.jpg");
     }
 
     @After

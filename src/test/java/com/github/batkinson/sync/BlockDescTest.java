@@ -27,7 +27,7 @@ public class BlockDescTest {
 
     @Before
     public void setup() throws URISyntaxException, FileNotFoundException {
-        input = TestUtils.openFile("file1.txt");
+        input = TestUtils.testFile("file1.txt");
     }
 
     @After

@@ -16,7 +16,7 @@ public class TestUtils {
     /**
      * Opens the named file from the first match in same package as this class. Used for test files.
      */
-    public static RandomAccessFile openFile(String path)
+    public static RandomAccessFile testFile(String path)
             throws URISyntaxException, FileNotFoundException {
         URL url = BlockDescTest.class.getResource(path);
         File f = new File(url.toURI());
