@@ -1,5 +1,7 @@
 # JRsync
 
+[![Build Status](https://travis-ci.org/batkinson/JRsync.svg?branch=master)](https://travis-ci.org/batkinson/JRsync)
+
 A library for efficiently synchronizing files, based on the rsync algorithm. It
 is intended to be usable by applications written for the Android mobile
 operating system with no additional dependencies, as well as from server
