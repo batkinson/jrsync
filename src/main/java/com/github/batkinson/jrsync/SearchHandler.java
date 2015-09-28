@@ -1,4 +1,4 @@
-package com.github.batkinson.sync;
+package com.github.batkinson.jrsync;
 
 import java.io.IOException;
 

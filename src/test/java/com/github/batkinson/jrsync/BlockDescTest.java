@@ -1,4 +1,4 @@
-package com.github.batkinson.sync;
+package com.github.batkinson.jrsync;
 
 import org.junit.After;
 import org.junit.Before;

@@ -1,4 +1,4 @@
-package com.github.batkinson.sync;
+package com.github.batkinson.jrsync;
 
 import org.junit.After;
 import org.junit.Before;
@@ -12,9 +12,9 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static com.github.batkinson.sync.BlockDesc.describe;
-import static com.github.batkinson.sync.TestUtils.computeHash;
-import static com.github.batkinson.sync.TestUtils.testFile;
+import static com.github.batkinson.jrsync.BlockDesc.describe;
+import static com.github.batkinson.jrsync.TestUtils.computeHash;
+import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 

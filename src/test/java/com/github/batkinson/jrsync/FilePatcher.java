@@ -1,10 +1,10 @@
-package com.github.batkinson.sync;
+package com.github.batkinson.jrsync;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import static com.github.batkinson.sync.TestUtils.writeContent;
+import static com.github.batkinson.jrsync.TestUtils.writeContent;
 
 /**
  * Patches a file together based on block search results. Precursor to actual patch code, but
