@@ -51,8 +51,6 @@ class SearchBuffer {
     }
 
     byte get(int index) {
-        if (index >= size)
-            throw new IndexOutOfBoundsException("index " + index + " greater than buffer size " + size);
         return buffer[offset(index)];
     }
 
