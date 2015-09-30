@@ -53,7 +53,8 @@ public class BlockDescTest {
                     log.debug(String.format("'%s' %d: %s %s%n", new String(block), d.blockIndex, d.weakChecksum, toHex(d.cryptoHash)));
                 }
                 checksum.reset();
-                assertEquals(checksum.start(block), d.weakChecksum);
+                checksum.update(block);
+                assertEquals(checksum.getValue(), d.weakChecksum);
                 assertArrayEquals(digest.digest(block), d.cryptoHash);
             }
             assertEquals(readBytes, descs.size() * blockSize);

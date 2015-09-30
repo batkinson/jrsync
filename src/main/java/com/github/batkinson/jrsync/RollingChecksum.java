@@ -1,64 +1,49 @@
 package com.github.batkinson.jrsync;
 
+import java.util.zip.Checksum;
+
 /**
  * Implementation of a rolling checksum as described in https://rsync.samba.org/tech_report/node3.html.
  */
-public class RollingChecksum {
+public class RollingChecksum implements Checksum {
 
     private static int POW2 = 16;
     private static int MOD_MASK = (1 << POW2) - 1;
 
-    private int window;
+    private byte[] buffer;
     private int a;
     private int b;
     private int i;
+    private int size;
 
     public RollingChecksum(int window) {
-        this.window = window;
+        this.buffer = new byte[window];
         reset();
     }
 
-    public long update(byte prevVal, byte byteVal) {
-        if (i <= window) {
-            add(byteVal);
+    @Override
+    public void update(int value) {
+        if (size < buffer.length) {
+            a = (a + value) & MOD_MASK;
+            b = (b + ((buffer.length - (i + 1) + 1) * value)) & MOD_MASK;
+            size++;
         } else {
-            roll(prevVal, byteVal);
+            a = ((a - buffer[i]) + value) & MOD_MASK;
+            b = (b - (buffer.length * buffer[i]) + a) & MOD_MASK;
         }
-        return getValue();
+        buffer[i] = (byte) value;
+        i = (i + 1) % buffer.length;
     }
 
-    public void add(byte value) {
-
-        if (i > window) {
-            throw new IllegalStateException("checksum requires prev start item to roll forward");
+    @Override
+    public void update(byte[] b, int off, int len) {
+        for (int i = off; i < off + len; i++) {
+            update(b[i]);
         }
-
-        a = (a + value) & MOD_MASK;
-        b = (b + ((window - i + 1) * value)) & MOD_MASK;
-        i++;
     }
 
-    private void roll(byte prevStart, byte nextEnd) {
-        a = ((a - prevStart) + nextEnd) & MOD_MASK;
-        b = (b - (window * prevStart) + a) & MOD_MASK;
-    }
-
-    public long start(byte[] content) {
-        return start(content, 0);
-    }
-
-    public long start(byte[] content, int offset) {
-
-        if (i != 1) {
-            throw new IllegalStateException("sum already started");
-        }
-
-        int stopOffset = offset + Math.min(window, content.length - offset);
-        for (int j = offset; j < stopOffset; j++) {
-            add(content[j]);
-        }
-
-        return getValue();
+    public void update(byte[] b) {
+        update(b, 0, b.length);
     }
 
     public long getValue() {
@@ -68,6 +53,7 @@ public class RollingChecksum {
     public void reset() {
         a = 0;
         b = 0;
-        i = 1;
+        i = 0;
+        size = 0;
     }
 }

@@ -31,7 +31,8 @@ public class BlockDesc {
         for (int i = 0, blockStart = 0; blockStart + blockSize <= length; i++, blockStart += blockSize) {
             file.seek(blockStart);
             file.readFully(block);
-            blockDescs.add(new BlockDesc(i, checksum.start(block), digest.digest(block)));
+            checksum.update(block);
+            blockDescs.add(new BlockDesc(i, checksum.getValue(), digest.digest(block)));
             checksum.reset();
         }
         return blockDescs;

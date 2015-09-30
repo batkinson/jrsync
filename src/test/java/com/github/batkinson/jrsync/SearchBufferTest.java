@@ -23,8 +23,8 @@ public class SearchBufferTest {
             // Add bytes that should cause wrapping, verify truncation
             for (int i = blockSize; i < items.length; i++) {
                 buf.add(items[i]);
-                assertEquals(items[i - blockSize], buf.get(0));
-                assertEquals(buf.capacity(), buf.length());
+                assertEquals(items[i - blockSize + 1], buf.get(0));
+                assertEquals(blockSize, buf.length());
             }
         }
     }
@@ -49,10 +49,14 @@ public class SearchBufferTest {
         SearchBuffer buf = new SearchBuffer(blockSize);
         byte[] block = Arrays.copyOfRange(items, 0, blockSize);
         buf.add(block);
-        assertEquals(new RollingChecksum(blockSize).start(block), buf.checksum());
+        RollingChecksum checksum = new RollingChecksum(blockSize);
+        checksum.update(block);
+        assertEquals(checksum.getValue(), buf.checksum());
         for (int i = blockSize; i < items.length; i++) {
+            checksum.reset();
             buf.add(items[i]);
-            assertEquals(new RollingChecksum(blockSize).start(Arrays.copyOfRange(items, i+1-blockSize,i+1)), buf.checksum());
+            checksum.update(Arrays.copyOfRange(items, i + 1 - blockSize, i + 1));
+            assertEquals(checksum.getValue(), buf.checksum());
         }
     }
 

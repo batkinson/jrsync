@@ -6,17 +6,13 @@ package com.github.batkinson.jrsync;
 class SearchBuffer {
 
     private long position;
-    private int blockSize;
-    private int capacity;
     private byte[] buffer;
     private int size;
     private int offset;
     private RollingChecksum checksum;
 
     public SearchBuffer(int blockSize) {
-        capacity = blockSize + 1;  // We need the byte previous to block to compute rolling sum
-        this.blockSize = blockSize;
-        buffer = new byte[capacity];
+        buffer = new byte[blockSize];
         position = 0;
         size = 0;
         offset = 0;
@@ -31,39 +27,24 @@ class SearchBuffer {
         return size;
     }
 
-    public int capacity() {
-        return capacity;
-    }
-
     private int offset(int index) {
-        return (offset + index) % capacity;
+        return (offset + index) % buffer.length;
     }
 
     public void add(byte item) {
 
-        // Append item to buffer maintaining...
-        if (size >= blockSize) {
+        if (size >= buffer.length) {
             position++; // position in stream of bytes of block start
-        }
-
-        if (size < capacity) {
-            size++;  // length of content in our internal buffer
+            offset++;   // position in internal buffer to write next byte
         } else {
-            offset++;  // starting offset of the beginning of content (byte prior to block start)
+            size++;     // just write directly until we reach capacity
         }
 
         buffer[offset(size - 1)] = item; // Add the item to the end of the window
-
-        if (size <= blockSize) {
-            checksum.add(item);
-        } else {
-            checksum.update(get(0), item);
-        }
+        checksum.update(item);
     }
 
     public void add(byte[] items) {
-        if (items.length > capacity)
-            throw new IllegalArgumentException("items exceed capacity");
         for (int i = 0; i < items.length; i++) {
             add(items[i]);
         }
@@ -76,9 +57,8 @@ class SearchBuffer {
     }
 
     public byte[] getBlock(byte[] toFill) {
-        int shim = size < capacity? 0 : 1;
         for (int i = 0; i < Math.min(size, toFill.length); i++)
-            toFill[i] = get(i + shim);
+            toFill[i] = get(i);
         return toFill;
     }
 

@@ -11,22 +11,27 @@ public class RollingChecksumTest {
     @Test
     public void checksumOfOneByte() {
         RollingChecksum small = new RollingChecksum(1);
-        assertEquals(5374034, small.start(content));
+        small.update(content[0]);
+        assertEquals(5374034, small.getValue());
     }
 
     @Test
     public void checksumOfTwoByes() {
         RollingChecksum small = new RollingChecksum(2);
-        assertEquals(18022593, small.start(content));
+        small.update(content, 0, 2);
+        assertEquals(18022593, small.getValue());
     }
 
     @Test
     public void checksumRollsOnce() {
         RollingChecksum direct = new RollingChecksum(1);
         RollingChecksum rolled = new RollingChecksum(1);
-        assertEquals(5374034, rolled.start(content));
-        assertEquals(7274607, direct.start(content, 1));
-        assertEquals(7274607, rolled.update(content[0], content[1]));
+        rolled.update(content[0]);
+        direct.update(content, 0, 2);
+        assertEquals(5374034, rolled.getValue());
+        assertEquals(7274607, direct.getValue());
+        rolled.update(content[1]);
+        assertEquals(7274607, rolled.getValue());
     }
 
     @Test
@@ -34,11 +39,9 @@ public class RollingChecksumTest {
         RollingChecksum rolled = new RollingChecksum(1);
         for (int i = 0; i < content.length; i++) {
             RollingChecksum direct = new RollingChecksum(1);
-            if (i == 0) {
-                assertEquals(direct.start(content), rolled.start(content));
-            } else {
-                assertEquals(direct.start(content, i), rolled.update(content[i - 1], content[i]));
-            }
+            direct.update(content, 0, i + 1);
+            rolled.update(content[i]);
+            assertEquals(direct.getValue(), rolled.getValue());
         }
     }
 
@@ -48,25 +51,25 @@ public class RollingChecksumTest {
         RollingChecksum direct = new RollingChecksum(1);
         for (int i = 0; i < content.length; i++) {
             direct.reset();
-            if (i == 0) {
-                assertEquals(direct.start(content), rolled.start(content));
-            } else {
-                assertEquals(direct.start(content, i), rolled.update(content[i - 1], content[i]));
-            }
+            direct.update(content, 0, i + 1);
+            rolled.update(content[i]);
+            assertEquals(direct.getValue(), rolled.getValue());
         }
     }
 
     @Test
     public void testRollsWithLargerWindows() {
-        for (int w = 2; w < content.length; w++) {
-            RollingChecksum rolled = new RollingChecksum(w);
-            for (int i = 0; i < (content.length - w); i++) {
-                RollingChecksum direct = new RollingChecksum(w);
+        for (int window = 2; window < content.length; window++) {
+            RollingChecksum rolled = new RollingChecksum(window);
+            for (int i = 0; i < content.length - window; i++) {
+                RollingChecksum direct = new RollingChecksum(window);
+                direct.update(content, i, window);
                 if (i == 0) {
-                    assertEquals(direct.start(content), rolled.start(content));
+                    rolled.update(content, 0, window);
                 } else {
-                    assertEquals(direct.start(content, i), rolled.update(content[i - 1], content[i + w - 1]));
+                    rolled.update(content[i + window - 1]);
                 }
+                assertEquals(direct.getValue(), rolled.getValue());
             }
         }
     }

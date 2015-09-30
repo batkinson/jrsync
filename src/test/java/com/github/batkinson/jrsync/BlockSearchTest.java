@@ -54,7 +54,7 @@ public class BlockSearchTest {
 
     @Test
     public void execute() throws IOException, NoSuchAlgorithmException {
-        for (int blockSize : Arrays.asList(1, 13, (int)file1.length(), (int)file2.length(), 1100)) {
+        for (int blockSize : Arrays.asList(1, 13, (int) file1.length(), (int) file2.length(), 1100)) {
             assertPatch(blockSize, "bstfile", file1, file2);
         }
     }
