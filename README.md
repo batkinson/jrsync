@@ -1,6 +1,7 @@
 # JRsync
 
 [![Build Status](https://travis-ci.org/batkinson/JRsync.svg?branch=master)](https://travis-ci.org/batkinson/JRsync)
+[![Coverage Status](https://coveralls.io/repos/batkinson/JRsync/badge.svg?branch=master&service=github)](https://coveralls.io/github/batkinson/JRsync?branch=master)
 
 A library for efficiently synchronizing files, based on the rsync algorithm. It
 is intended to be usable by applications written for the Android mobile
