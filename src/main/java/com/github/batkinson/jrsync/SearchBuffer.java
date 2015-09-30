@@ -35,7 +35,7 @@ class SearchBuffer {
 
         if (size >= buffer.length) {
             position++; // position in stream of bytes of block start
-            offset++;   // position in internal buffer to write next byte
+            offset = (offset + 1) % buffer.length; // internal start position
         } else {
             size++;     // just write directly until we reach capacity
         }
