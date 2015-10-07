@@ -7,8 +7,7 @@ import java.io.RandomAccessFile;
 import static com.github.batkinson.jrsync.TestUtils.writeContent;
 
 /**
- * Patches a file together based on block search results. Precursor to actual patch code, but
- * doesn't handle large content sections.
+ * Patches a file together based on block search results. Precursor to actual patch code.
  */
 class FilePatcher implements SearchHandler {
 
