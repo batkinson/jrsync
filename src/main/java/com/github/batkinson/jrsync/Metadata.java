@@ -1,14 +1,56 @@
 package com.github.batkinson.jrsync;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Writes a metadata description of a file to a stream.
  */
 public class Metadata {
+
+    private String contentSource = "";
+    private String fileHashAlg = "SHA1";
+    private String blockHashAlg = "MD5";
+    private int blockSize;
+    private long fileSize;
+    private byte[] fileHash;
+    private final List<BlockDesc> blockDescs = new ArrayList<>();
+
+    Metadata() {
+    }
+
+    public String getContentSource() {
+        return contentSource;
+    }
+
+    public String getFileHashAlg() {
+        return fileHashAlg;
+    }
+
+    public String getBlockHashAlg() {
+        return blockHashAlg;
+    }
+
+    public int getBlockSize() {
+        return blockSize;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public byte[] getFileHash() {
+        return fileHash;
+    }
+
+    public List<BlockDesc> getBlockDescs() {
+        return blockDescs;
+    }
 
     public static void write(String contentSource, int blockSize, String fileHashAlg, String blockHash, RandomAccessFile source, RandomAccessFile metadata) throws IOException, NoSuchAlgorithmException {
 
@@ -59,5 +101,29 @@ public class Metadata {
         // Update the file hash once we have processed the entire contents
         metadata.seek(fileHashPos);
         metadata.write(fileDigest.digest());
+    }
+
+    public static Metadata read(DataInput in) throws IOException, NoSuchAlgorithmException {
+
+        Metadata result = new Metadata();
+
+        result.fileHashAlg = in.readUTF();
+        result.fileHash = new byte[in.readByte()];
+        in.readFully(result.fileHash);
+        result.fileSize = in.readLong();
+        result.contentSource = in.readUTF();
+        result.blockHashAlg = in.readUTF();
+        int blockHashSize = in.readByte();
+        result.blockSize = in.readInt();
+
+        int completeBlocks = (int) (result.fileSize / result.blockSize);
+        for (int i = 0; i < completeBlocks; i++) {
+            long checksum = in.readInt();
+            byte[] hash = new byte[blockHashSize];
+            in.readFully(hash);
+            result.blockDescs.add(new BlockDesc(i, checksum, hash));
+        }
+
+        return result;
     }
 }

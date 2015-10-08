@@ -43,22 +43,62 @@ public class TestUtils {
         }
     }
 
+    public static long computeChecksum(RandomAccessFile f, int blockSize) throws IOException {
+        return computeChecksum(f, blockSize, 0);
+    }
+
+    public static long computeChecksum(RandomAccessFile f, int blockSize, long offset) throws IOException {
+        long origPosition = f.getFilePointer();
+        try {
+            f.seek(offset);
+            RollingChecksum checksum = new RollingChecksum(blockSize);
+            byte[] block = new byte[blockSize];
+            f.readFully(block);
+            checksum.update(block);
+            return checksum.getValue();
+        } finally {
+            f.seek(origPosition);
+        }
+    }
+
+    public static byte[] computeHash(RandomAccessFile f)
+            throws IOException, NoSuchAlgorithmException {
+        return computeHash(f, "SHA1");
+    }
+
     /**
      * Used to verify integrity of copied files, leaving position where it was when it was first
      * invoked. Handles large files efficiently.
      */
-    public static byte[] computeHash(RandomAccessFile f)
+    public static byte[] computeHash(RandomAccessFile f, String alg)
             throws IOException, NoSuchAlgorithmException {
         long origPos = f.getFilePointer();
         try {
             f.seek(0);
             int read;
-            MessageDigest digest = MessageDigest.getInstance("SHA1");
+            MessageDigest digest = MessageDigest.getInstance(alg);
             byte[] scratch = new byte[BLOCK_SIZE];
             while ((read = f.read(scratch)) >= 0) {
                 digest.update(scratch, 0, read);
             }
             return digest.digest();
+        } finally {
+            f.seek(origPos);
+        }
+    }
+
+    /**
+     * Complutes a hash of only a block of a file.
+     */
+    public static byte[] computeHash(RandomAccessFile f, String alg, int blockSize, long offset)
+            throws IOException, NoSuchAlgorithmException {
+        long origPos = f.getFilePointer();
+        try {
+            f.seek(offset);
+            MessageDigest digest = MessageDigest.getInstance(alg);
+            byte[] block = new byte[blockSize];
+            f.readFully(block);
+            return digest.digest(block);
         } finally {
             f.seek(origPos);
         }
