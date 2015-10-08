@@ -34,7 +34,7 @@ The format, and the means to access that content is intentionally unspecified.
 The remainder of the file consists of File-Size/Block-Size block descriptors in
 the order they occur in the file and of the form:
 
-<Block-Checksum/long>
+<Block-Checksum/int>
 <Block-Hash/bytes>
 
 The checksum is always the rolling checksum value implemented by JRSync. The
