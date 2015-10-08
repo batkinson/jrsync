@@ -35,4 +35,16 @@ public class MetadataTest {
         assertEquals(ref.length(), output.length());
         assertArrayEquals(computeHash(ref), computeHash(output));
     }
+
+    @Test
+    public void multiBlockWriteWithSource() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+        String sourceName = "nowhere";
+        RandomAccessFile output = new RandomAccessFile(
+                File.createTempFile("multiBlock", "", outputDir), "rw");
+        RandomAccessFile in = testFile("file2.txt");
+        Metadata.write(sourceName, 100, "SHA1", "MD5", in, output);
+        RandomAccessFile ref = testFile("file2.jrsmd");
+        assertEquals(ref.length(), output.length());
+        assertArrayEquals(computeHash(ref), computeHash(output));
+    }
 }
