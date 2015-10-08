@@ -87,7 +87,7 @@ public class Metadata {
         for (int i = 0; i < wholeBlocks; i++) {
             source.readFully(block);
             checksum.update(block);
-            metadata.writeInt((int)checksum.getValue());
+            metadata.writeInt((int) checksum.getValue());
             metadata.write(blockDigest.digest(block));
             fileDigest.update(block);
         }
