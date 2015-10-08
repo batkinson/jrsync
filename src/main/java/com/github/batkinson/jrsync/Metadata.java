@@ -66,8 +66,10 @@ public class Metadata {
         long fileHashPos = metadata.getFilePointer();
         metadata.write(fileDigest.digest());
 
+        long sourceLength = source.length();
+
         // File size
-        metadata.writeLong(source.length());
+        metadata.writeLong(sourceLength);
 
         // File source
         metadata.writeUTF(contentSource);
@@ -82,8 +84,8 @@ public class Metadata {
         /* The Sums */
         source.seek(0);
         byte[] block = new byte[blockSize];
-        int wholeBlocks = (int) (source.length() / blockSize);
-        int remainder = (int) (source.length() % blockSize);
+        int wholeBlocks = (int) (sourceLength / blockSize);
+        int remainder = (int) (sourceLength % blockSize);
         for (int i = 0; i < wholeBlocks; i++) {
             source.readFully(block);
             checksum.update(block);
