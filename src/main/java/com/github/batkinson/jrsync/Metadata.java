@@ -40,9 +40,9 @@ public class Metadata {
         /* The Sums */
         source.seek(0);
         byte[] block = new byte[blockSize];
-        int wholeBlocks = (int)(source.length() / blockSize);
-        int remainder = (int)(source.length() % blockSize);
-        for (int i = 0; i<wholeBlocks; i++) {
+        int wholeBlocks = (int) (source.length() / blockSize);
+        int remainder = (int) (source.length() % blockSize);
+        for (int i = 0; i < wholeBlocks; i++) {
             source.readFully(block);
             checksum.update(block);
             metadata.writeInt((int)checksum.getValue());
