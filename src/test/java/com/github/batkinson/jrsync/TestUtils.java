@@ -1,8 +1,10 @@
 package com.github.batkinson.jrsync;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -14,12 +16,25 @@ public class TestUtils {
     public static final int BLOCK_SIZE = 4096;
 
     /**
-     * Opens the named file from the first match in same package as this class. Used for test files.
+     * Given a package relative resource path, returns a file object.
      */
-    public static RandomAccessFile testFile(String path)
-            throws URISyntaxException, FileNotFoundException {
+    public static File testFile(String path) throws URISyntaxException {
         URL url = BlockDescTest.class.getResource(path);
-        File f = new File(url.toURI());
+        return new File(url.toURI());
+    }
+
+    /**
+     * Given a package relative resource path, returns it as an {@link InputStream}.
+     */
+    public static InputStream inputStream(File f) throws FileNotFoundException {
+        return new FileInputStream(f);
+    }
+
+    /**
+     * Opens given file from the first match in same package as this class. Used for test files.
+     */
+    public static RandomAccessFile randomAccess(File f)
+            throws URISyntaxException, FileNotFoundException {
         return new RandomAccessFile(f, "r");
     }
 

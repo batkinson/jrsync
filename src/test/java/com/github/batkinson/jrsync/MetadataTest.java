@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 
 import static com.github.batkinson.jrsync.TestUtils.computeChecksum;
 import static com.github.batkinson.jrsync.TestUtils.computeHash;
+import static com.github.batkinson.jrsync.TestUtils.randomAccess;
+import static com.github.batkinson.jrsync.TestUtils.inputStream;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -29,31 +31,28 @@ public class MetadataTest {
     @Test
     public void simpleWrite() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         String sourceName = "";
-        RandomAccessFile output = new RandomAccessFile(
-                File.createTempFile("simple", "", outputDir), "rw");
-        RandomAccessFile in = testFile("file1.txt");
-        Metadata.write(sourceName, (int) in.length(), "MD5", "MD5", in, output);
-        RandomAccessFile ref = testFile("file1.jrsmd");
+        File output = File.createTempFile("simple", "", outputDir);
+        File in = testFile("file1.txt");
+        Metadata.write(sourceName, (int) in.length(), "MD5", "MD5", inputStream(in), output);
+        RandomAccessFile ref = randomAccess(testFile("file1.jrsmd"));
         assertEquals(ref.length(), output.length());
-        assertArrayEquals(computeHash(ref), computeHash(output));
+        assertArrayEquals(computeHash(ref), computeHash(randomAccess(output)));
     }
 
     @Test
     public void multiBlockWriteWithSource() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         String sourceName = "nowhere";
-        RandomAccessFile output = new RandomAccessFile(
-                File.createTempFile("multiBlock", "", outputDir), "rw");
-        RandomAccessFile in = testFile("file2.txt");
-        Metadata.write(sourceName, 100, "SHA1", "MD5", in, output);
-        RandomAccessFile ref = testFile("file2.jrsmd");
+        File output = File.createTempFile("multiBlock", "", outputDir);
+        Metadata.write(sourceName, 100, "SHA1", "MD5", inputStream(testFile("file2.txt")), output);
+        RandomAccessFile ref = randomAccess(testFile("file2.jrsmd"));
         assertEquals(ref.length(), output.length());
-        assertArrayEquals(computeHash(ref), computeHash(output));
+        assertArrayEquals(computeHash(ref), computeHash(randomAccess(output)));
     }
 
     @Test
     public void readSimpleMetadata() throws IOException, URISyntaxException, NoSuchAlgorithmException {
-        RandomAccessFile file1 = testFile("file1.txt");
-        RandomAccessFile file1meta = testFile("file1.jrsmd");
+        RandomAccessFile file1 = randomAccess(testFile("file1.txt"));
+        RandomAccessFile file1meta = randomAccess(testFile("file1.jrsmd"));
 
         Metadata metadata = Metadata.read(file1meta);
 
@@ -73,8 +72,8 @@ public class MetadataTest {
 
     @Test
     public void readMultiBlockMetadata() throws IOException, URISyntaxException, NoSuchAlgorithmException {
-        RandomAccessFile file2 = testFile("file2.txt");
-        RandomAccessFile file2meta = testFile("file2.jrsmd");
+        RandomAccessFile file2 = randomAccess(testFile("file2.txt"));
+        RandomAccessFile file2meta = randomAccess(testFile("file2.jrsmd"));
 
         Metadata metadata = Metadata.read(file2meta);
 

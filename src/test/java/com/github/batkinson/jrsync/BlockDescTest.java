@@ -14,6 +14,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import static com.github.batkinson.jrsync.TestUtils.randomAccess;
+import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -27,7 +29,7 @@ public class BlockDescTest {
 
     @Before
     public void setup() throws URISyntaxException, FileNotFoundException {
-        input = TestUtils.testFile("file1.txt");
+        input = randomAccess(testFile("file1.txt"));
     }
 
     @After

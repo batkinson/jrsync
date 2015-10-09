@@ -14,6 +14,7 @@ import java.util.Arrays;
 
 import static com.github.batkinson.jrsync.BlockDesc.describe;
 import static com.github.batkinson.jrsync.TestUtils.computeHash;
+import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -35,10 +36,10 @@ public class BlockSearchTest {
         outputDir = new File(System.getProperty("outputDir"), "patched-files");
         outputDir.mkdirs();
 
-        file1 = testFile("file1.txt");
-        file2 = testFile("file2.txt");
-        violin = testFile("violin.jpg");
-        guitar = testFile("guitar.jpg");
+        file1 = randomAccess(testFile("file1.txt"));
+        file2 = randomAccess(testFile("file2.txt"));
+        violin = randomAccess(testFile("violin.jpg"));
+        guitar = randomAccess(testFile("guitar.jpg"));
     }
 
     @After
