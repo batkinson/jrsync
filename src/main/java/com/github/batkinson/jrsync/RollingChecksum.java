@@ -23,6 +23,7 @@ public class RollingChecksum implements Checksum {
 
     @Override
     public void update(int value) {
+        value = value & 0xFF;
         if (size < buffer.length) {
             a = (a + value) & MOD_MASK;
             b = (b + ((buffer.length - (i + 1) + 1) * value)) & MOD_MASK;
