@@ -56,7 +56,10 @@ public class Metadata {
         return blockDescs;
     }
 
-    public static void write(String contentSource, int blockSize, String fileHashAlg, String blockHashAlg, InputStream source, File metadata) throws IOException, NoSuchAlgorithmException {
+    /**
+     * Utility for generating a metadata file for an input stream.
+     */
+    public static void generate(String contentSource, int blockSize, String fileHashAlg, String blockHashAlg, InputStream source, File metadata) throws IOException, NoSuchAlgorithmException {
         MetadataInputWrapper out = new MetadataInputWrapper(new BufferedInputStream(source), contentSource, blockSize, fileHashAlg, blockHashAlg);
         try {
             while (out.read() >= 0);
@@ -66,6 +69,9 @@ public class Metadata {
         }
     }
 
+    /**
+     * Utility for loading metadata from a file.
+     */
     public static Metadata read(DataInput in) throws IOException, NoSuchAlgorithmException {
 
         Metadata result = new Metadata();

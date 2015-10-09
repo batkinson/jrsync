@@ -33,7 +33,7 @@ public class MetadataTest {
         String sourceName = "";
         File output = File.createTempFile("simple", "", outputDir);
         File in = testFile("file1.txt");
-        Metadata.write(sourceName, (int) in.length(), "MD5", "MD5", inputStream(in), output);
+        Metadata.generate(sourceName, (int) in.length(), "MD5", "MD5", inputStream(in), output);
         RandomAccessFile ref = randomAccess(testFile("file1.jrsmd"));
         assertEquals(ref.length(), output.length());
         assertArrayEquals(computeHash(ref), computeHash(randomAccess(output)));
@@ -43,7 +43,7 @@ public class MetadataTest {
     public void multiBlockWriteWithSource() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         String sourceName = "nowhere";
         File output = File.createTempFile("multiBlock", "", outputDir);
-        Metadata.write(sourceName, 100, "SHA1", "MD5", inputStream(testFile("file2.txt")), output);
+        Metadata.generate(sourceName, 100, "SHA1", "MD5", inputStream(testFile("file2.txt")), output);
         RandomAccessFile ref = randomAccess(testFile("file2.jrsmd"));
         assertEquals(ref.length(), output.length());
         assertArrayEquals(computeHash(ref), computeHash(randomAccess(output)));
