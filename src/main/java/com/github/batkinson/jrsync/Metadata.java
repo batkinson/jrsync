@@ -21,7 +21,7 @@ public class Metadata {
     private byte[] fileHash;
     private final List<BlockDesc> blockDescs = new ArrayList<>();
 
-    Metadata() {
+    private Metadata() {
     }
 
     public String getContentSource() {
