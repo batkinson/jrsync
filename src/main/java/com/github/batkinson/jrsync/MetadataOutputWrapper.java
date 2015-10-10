@@ -22,7 +22,7 @@ public class MetadataOutputWrapper extends OutputStream {
             throws NoSuchAlgorithmException, IOException {
         this.wrapped = wrapped;
         generator = new MetadataGenerator(source, blockSize, fileHashAlg, blockHashAlg);
-        metadataFile = File.createTempFile("mow", "jrsmd");
+        metadataFile = File.createTempFile("mow", Metadata.FILE_EXT);
         metadata = new RandomAccessFile(metadataFile, "rw");
         generator.setHandler(new MetadataWriter(metadata));
     }

@@ -17,7 +17,8 @@ import java.util.List;
  */
 public class Metadata {
 
-    public static final String MIME_TYPE = "application/vnd.jrsync+jrsmd";
+    public static final String FILE_EXT = "jrsmd";
+    public static final String MIME_TYPE = "application/vnd.jrsync+" + FILE_EXT;
 
     private String contentSource = "";
     private String fileHashAlg = "SHA1";
