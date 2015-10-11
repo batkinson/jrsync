@@ -78,7 +78,7 @@ public class BlockSearch {
                     needsContent(handler, interimStart, sb.position());
                 }
                 // matching block in dest file, communicate match
-                handler.matched(sb.position(), match.blockIndex);
+                handler.matched(sb.position(), match);
                 interimStart = nextStart;
                 // advance buffer to be at block's end
                 if (nextStart <= file.length()) {
