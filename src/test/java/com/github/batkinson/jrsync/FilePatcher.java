@@ -30,7 +30,7 @@ class FilePatcher implements SearchHandler {
     }
 
     @Override
-    public void blockMatch(long offset, long blockIndex) throws IOException {
+    public void matched(long offset, long blockIndex) throws IOException {
         long start = blockIndex * blockSize, end = start + blockSize, size = end - start;
         bytesMatched += size;
         dest.seek(offset);
@@ -38,7 +38,7 @@ class FilePatcher implements SearchHandler {
     }
 
     @Override
-    public void needsContent(long startOffset, long endOffset) throws IOException {
+    public void unmatched(long startOffset, long endOffset) throws IOException {
         bytesNeeded += endOffset - startOffset;
         dest.seek(startOffset);
         writeContent(target, startOffset, endOffset, dest);

@@ -8,6 +8,6 @@ import java.io.IOException;
  * such as compression, etc.
  */
 public interface SearchHandler {
-    void blockMatch(long startOffset, long blockIndex) throws IOException;
-    void needsContent(long startOffset, long endOffset) throws IOException;
+    void matched(long startOffset, long blockIndex) throws IOException;
+    void unmatched(long startOffset, long endOffset) throws IOException;
 }
