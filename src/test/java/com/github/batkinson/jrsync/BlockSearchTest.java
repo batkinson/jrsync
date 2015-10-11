@@ -44,7 +44,7 @@ public class BlockSearchTest {
 
     @After
     public void teardown() {
-        for (RandomAccessFile f : Arrays.asList(file1, file2)) {
+        for (RandomAccessFile f : Arrays.asList(file1, file2, violin, guitar)) {
             try {
                 f.close();
             } catch (IOException e) {
