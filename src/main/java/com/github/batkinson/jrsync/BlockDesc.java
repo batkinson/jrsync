@@ -12,9 +12,9 @@ import java.util.List;
  */
 public class BlockDesc {
 
-    long blockIndex;
-    long weakChecksum;
-    byte[] cryptoHash;
+    final long blockIndex;
+    final long weakChecksum;
+    final byte[] cryptoHash;
 
     public BlockDesc(long blockIndex, long weakChecksum, byte[] cryptoHash) {
         this.blockIndex = blockIndex;
@@ -36,5 +36,17 @@ public class BlockDesc {
             checksum.reset();
         }
         return blockDescs;
+    }
+
+    public long getBlockIndex() {
+        return blockIndex;
+    }
+
+    public long getWeakChecksum() {
+        return weakChecksum;
+    }
+
+    public byte[] getCryptoHash() {
+        return cryptoHash;
     }
 }

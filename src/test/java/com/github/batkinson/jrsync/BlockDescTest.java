@@ -64,6 +64,15 @@ public class BlockDescTest {
         }
     }
 
+    @Test
+    public void getters() {
+        byte[] bs = {1, 2, 3};
+        BlockDesc bd = new BlockDesc(1, 2, bs);
+        assertEquals(1, bd.getBlockIndex());
+        assertEquals(2, bd.getWeakChecksum());
+        assertArrayEquals(bs, bd.getCryptoHash());
+    }
+
     private String toHex(byte[] bytes) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < bytes.length; i++)
