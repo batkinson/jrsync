@@ -17,6 +17,7 @@ import java.util.List;
 import static com.github.batkinson.jrsync.TestUtils.computeBlocks;
 import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
+import static com.github.batkinson.jrsync.TestUtils.toHex;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -72,12 +73,5 @@ public class BlockDescTest {
         assertEquals(1, bd.getBlockIndex());
         assertEquals(2, bd.getWeakChecksum());
         assertArrayEquals(bs, bd.getCryptoHash());
-    }
-
-    private String toHex(byte[] bytes) {
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++)
-            b.append(String.format("%02x", bytes[i]));
-        return b.toString();
     }
 }
