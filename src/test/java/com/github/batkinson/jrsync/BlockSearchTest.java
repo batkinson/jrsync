@@ -12,7 +12,7 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static com.github.batkinson.jrsync.BlockDesc.describe;
+import static com.github.batkinson.jrsync.TestUtils.computeBlocks;
 import static com.github.batkinson.jrsync.TestUtils.computeHash;
 import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
@@ -77,7 +77,7 @@ public class BlockSearchTest {
 
     private void assertPatch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target)
             throws IOException, NoSuchAlgorithmException {
-        final BlockSearch search = new BlockSearch(describe(basis, blockSize, MD5), blockSize);
+        final BlockSearch search = new BlockSearch(computeBlocks(basis, blockSize, MD5), blockSize);
         FilePatcher patcher = new FilePatcher(name + "-" + blockSize + "-", blockSize, basis, target, outputDir);
         search.execute(target, MD5, patcher);
         assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));

@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import static com.github.batkinson.jrsync.TestUtils.computeBlocks;
 import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
@@ -46,7 +47,7 @@ public class BlockDescTest {
             RollingChecksum checksum = new RollingChecksum(blockSize);
             MessageDigest digest = MessageDigest.getInstance(MD5);
             byte[] block = new byte[blockSize];
-            List<BlockDesc> descs = BlockDesc.describe(input, blockSize, MD5);
+            List<BlockDesc> descs = computeBlocks(input, blockSize, MD5);
             for (BlockDesc d : descs) {
                 input.seek(d.blockIndex * blockSize);
                 input.readFully(block);

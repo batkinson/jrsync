@@ -10,6 +10,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestUtils {
 
@@ -146,6 +148,22 @@ public class TestUtils {
             result[i] = (byte) ((v & mask) >>> bitShiftAmt);
         }
         return result;
+    }
+
+    public static List<BlockDesc> computeBlocks(RandomAccessFile file, int blockSize, String digestAlgorithm) throws IOException, NoSuchAlgorithmException {
+        List<BlockDesc> blockDescs = new ArrayList<>();
+        long length = file.length();
+        byte[] block = new byte[blockSize];
+        MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
+        RollingChecksum checksum = new RollingChecksum(blockSize);
+        for (int i = 0, blockStart = 0; blockStart + blockSize <= length; i++, blockStart += blockSize) {
+            file.seek(blockStart);
+            file.readFully(block);
+            checksum.update(block);
+            blockDescs.add(new BlockDesc(i, checksum.getValue(), digest.digest(block)));
+            checksum.reset();
+        }
+        return blockDescs;
     }
 
     /**

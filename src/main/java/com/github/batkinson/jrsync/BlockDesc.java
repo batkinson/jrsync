@@ -22,22 +22,6 @@ public class BlockDesc {
         this.cryptoHash = cryptoHash;
     }
 
-    public static List<BlockDesc> describe(RandomAccessFile file, int blockSize, String digestAlgorithm) throws IOException, NoSuchAlgorithmException {
-        List<BlockDesc> blockDescs = new ArrayList<>();
-        long length = file.length();
-        byte[] block = new byte[blockSize];
-        MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
-        RollingChecksum checksum = new RollingChecksum(blockSize);
-        for (int i = 0, blockStart = 0; blockStart + blockSize <= length; i++, blockStart += blockSize) {
-            file.seek(blockStart);
-            file.readFully(block);
-            checksum.update(block);
-            blockDescs.add(new BlockDesc(i, checksum.getValue(), digest.digest(block)));
-            checksum.reset();
-        }
-        return blockDescs;
-    }
-
     public long getBlockIndex() {
         return blockIndex;
     }
