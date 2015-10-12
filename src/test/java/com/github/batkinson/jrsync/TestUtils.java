@@ -44,15 +44,15 @@ public class TestUtils {
      * Gets the specified section of the file as a byte array, then returns the file to its previous
      * position.
      */
-    public static void writeContent(RandomAccessFile source, long start, long end, RandomAccessFile dest)
+    public static void copyRange(RandomAccessFile source, long start, long end, RandomAccessFile dest)
             throws IOException {
         long origPos = source.getFilePointer();
         try {
             source.seek(start);
-            int read, scratchSize = BLOCK_SIZE, remaining = (int) (end - start);
-            byte[] scratch = new byte[scratchSize];
-            while (remaining > 0 && (read = source.read(scratch, 0, Math.min(scratchSize, remaining))) >= 0) {
-                dest.write(scratch, 0, read);
+            int read, bufSize = BLOCK_SIZE, remaining = (int) (end - start);
+            byte[] buf = new byte[bufSize];
+            while (remaining > 0 && (read = source.read(buf, 0, Math.min(bufSize, remaining))) >= 0) {
+                dest.write(buf, 0, read);
                 remaining -= read;
             }
         } finally {

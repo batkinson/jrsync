@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import static com.github.batkinson.jrsync.TestUtils.writeContent;
+import static com.github.batkinson.jrsync.TestUtils.copyRange;
 
 /**
  * Patches a file together based on block search results. Precursor to actual patch code.
@@ -34,14 +34,14 @@ class FilePatcher implements SearchHandler {
         long start = match.blockIndex * blockSize, end = start + blockSize, size = end - start;
         bytesMatched += size;
         dest.seek(offset);
-        writeContent(basis, start, end, dest);
+        copyRange(basis, start, end, dest);
     }
 
     @Override
-    public void unmatched(long startOffset, long endOffset) throws IOException {
-        bytesNeeded += endOffset - startOffset;
-        dest.seek(startOffset);
-        writeContent(target, startOffset, endOffset, dest);
+    public void unmatched(long start, long end) throws IOException {
+        bytesNeeded += end - start;
+        dest.seek(start);
+        copyRange(target, start, end, dest);
     }
 
     public long getBytesMatched() {
