@@ -18,9 +18,9 @@ class FilePatcher implements SearchHandler {
     private long bytesMatched = 0;
     private long bytesNeeded = 0;
 
-    FilePatcher(String name, int blockSize, RandomAccessFile basis, RandomAccessFile target, File dest) throws IOException {
+    FilePatcher(int blockSize, RandomAccessFile basis, RandomAccessFile target, File dest) throws IOException {
         this.blockSize = blockSize;
-        this.dest = new RandomAccessFile(File.createTempFile(name, "", dest), "rw");
+        this.dest = new RandomAccessFile(dest, "rw");
         this.basis = basis;
         this.target = target;
     }

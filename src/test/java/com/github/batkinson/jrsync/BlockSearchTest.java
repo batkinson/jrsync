@@ -78,7 +78,8 @@ public class BlockSearchTest {
     private void assertPatch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target)
             throws IOException, NoSuchAlgorithmException {
         final BlockSearch search = new BlockSearch(computeBlocks(basis, blockSize, MD5), blockSize);
-        FilePatcher patcher = new FilePatcher(name + "-" + blockSize + "-", blockSize, basis, target, outputDir);
+        File tempFile = File.createTempFile(name + "-" + blockSize + "-", "", outputDir);
+        FilePatcher patcher = new FilePatcher(blockSize, basis, target, tempFile);
         search.execute(target, MD5, patcher);
         assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
         assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
