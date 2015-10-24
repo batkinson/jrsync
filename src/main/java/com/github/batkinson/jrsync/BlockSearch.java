@@ -72,33 +72,28 @@ public class BlockSearch {
                 }
             }
 
-            if (match != null) {
-                long nextStart = sb.position() + blockSize;
-                if (interimStart != sb.position()) {
-                    unmatched(handler, interimStart, sb.position());
-                }
-                // matching block in dest file, communicate match
-                handler.matched(sb.position(), match);
-                interimStart = nextStart;
-                // advance buffer to be at block's end
-                if (nextStart <= file.length()) {
-                    try {
+            try {
+                if (match != null) {
+                    long nextStart = sb.position() + blockSize;
+                    if (interimStart != sb.position()) {
+                        unmatched(handler, interimStart, sb.position());
+                    }
+                    // matching block in dest file, communicate match
+                    handler.matched(sb.position(), match);
+                    interimStart = nextStart;
+                    // advance buffer to be at block's end
+                    if (nextStart <= file.length()) {
                         file.readFully(blockBuf);
                         sb.add(blockBuf);
-                    } catch (EOFException eof) {
-                        unmatched(handler, interimStart, file.length());
-                        return;
                     }
-                }
-            } else {
-                //   advance buffer one byte
-                try {
+                } else {
+                    // advance buffer one byte
                     byte next = file.readByte();
                     sb.add(next);
-                } catch (EOFException eof) {
-                    unmatched(handler, interimStart, file.length());
-                    return;
                 }
+            } catch (EOFException eof) {
+                unmatched(handler, interimStart, file.length());
+                return;
             }
         }
     }
