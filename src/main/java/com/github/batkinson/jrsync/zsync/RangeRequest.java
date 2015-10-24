@@ -10,7 +10,7 @@ import java.io.InputStream;
  */
 public interface RangeRequest extends Closeable {
 
-    int getResposeCode() throws IOException;
+    int getResponseCode() throws IOException;
 
     String getContentType();
 

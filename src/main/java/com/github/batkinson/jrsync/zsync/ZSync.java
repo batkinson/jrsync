@@ -113,7 +113,7 @@ public class ZSync {
                 req.setHeader(RANGE_HEADER, "bytes=" +
                         toRangeString(analyzer.getRemoteRanges()));
 
-                int status = req.getResposeCode();
+                int status = req.getResponseCode();
                 String contentType = req.getContentType(),
                         contentRange = req.getHeader(CONTENT_RANGE_HEADER);
                 InputStream bodyIn = req.getInputStream();
