@@ -137,7 +137,7 @@ public class ZSync {
             }
         } else {
             // Can construct file with only local content
-            buildFile(metadata, basis, analyzer.getMatches(), new NullRangeStream(), digestOut);
+            buildFile(metadata, basis, analyzer.getMatches(), new EmptyRangeStream(), digestOut);
         }
 
         close(digestOut);
@@ -155,7 +155,7 @@ public class ZSync {
      */
     static void buildFile(Metadata metadata, RandomAccessFile basis, Map<Long, Long> matches, RangeStream input, OutputStream output) throws IOException {
         if (input == null)
-            input = new NullRangeStream();
+            input = new EmptyRangeStream();
         int blockSize = metadata.getBlockSize();
         Range nextRange;
         long offset = 0;
@@ -361,9 +361,9 @@ interface RangeStream extends BlockReadable {
  * A {@link RangeStream} implementation useful when there is no remote content
  * to fetch.
  */
-class NullRangeStream implements RangeStream {
+class EmptyRangeStream implements RangeStream {
 
-    public NullRangeStream() {
+    public EmptyRangeStream() {
     }
 
     @Override
