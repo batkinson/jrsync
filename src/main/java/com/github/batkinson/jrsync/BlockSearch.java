@@ -7,10 +7,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.EMPTY_LIST;
 
 /**
  * Searches a file for blocks that match blocks described by the specified {@link BlockDesc}s for
@@ -19,14 +21,14 @@ import java.util.Map;
 public class BlockSearch {
 
     private int blockSize;
-    private Map<Long, List<BlockDesc>> blockDescs = Collections.emptyMap();
+    private List<BlockDesc> blockSummary;
 
     public BlockSearch(List<BlockDesc> basisDesc, int blockSize) {
         this.blockSize = blockSize;
-        this.blockDescs = Collections.unmodifiableMap(buildBlockTable(basisDesc));
+        this.blockSummary = basisDesc;
     }
 
-    private Map<Long, List<BlockDesc>> buildBlockTable(List<BlockDesc> blocks) {
+    private Map<Long, List<BlockDesc>> buildMatchTable(List<BlockDesc> blocks) {
         Map<Long, List<BlockDesc>> result = new HashMap<>();
         if (blocks != null) {
             for (BlockDesc desc : blocks) {
@@ -41,12 +43,13 @@ public class BlockSearch {
         return result;
     }
 
-    private List<BlockDesc> matchingBlocks(long checksum) {
-        return blockDescs.containsKey(checksum) ? blockDescs.get(checksum) : Collections.EMPTY_LIST;
+    private List<BlockDesc> checksumMatches(Map<Long, List<BlockDesc>> blockDescs, long checksum) {
+        return blockDescs.containsKey(checksum) ? blockDescs.get(checksum) : EMPTY_LIST;
     }
 
     public void execute(RandomAccessFile file, String digestAlgorithm, SearchHandler handler) throws IOException, NoSuchAlgorithmException {
 
+        Map<Long, List<BlockDesc>> blockTable = unmodifiableMap(buildMatchTable(blockSummary));
         long interimStart = 0;
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
@@ -66,7 +69,7 @@ public class BlockSearch {
         while (true) {
 
             BlockDesc match = null;
-            for (BlockDesc candidate : matchingBlocks(sb.checksum())) {
+            for (BlockDesc candidate : checksumMatches(blockTable, sb.checksum())) {
                 if (Arrays.equals(digest.digest(sb.getBlock(blockBuf)), candidate.cryptoHash)) {
                     match = candidate;
                     break;
