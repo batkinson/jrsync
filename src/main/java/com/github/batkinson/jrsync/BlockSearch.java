@@ -69,10 +69,14 @@ public class BlockSearch {
         while (true) {
 
             BlockDesc match = null;
-            for (BlockDesc candidate : checksumMatches(blockTable, sb.checksum())) {
-                if (Arrays.equals(digest.digest(sb.getBlock(blockBuf)), candidate.cryptoHash)) {
-                    match = candidate;
-                    break;
+            List<BlockDesc> candidates = checksumMatches(blockTable, sb.checksum());
+            if (!candidates.isEmpty()) {
+                byte[] contentHash = digest.digest(sb.getBlock(blockBuf));
+                for (BlockDesc candidate : candidates) {
+                    if (Arrays.equals(contentHash, candidate.cryptoHash)) {
+                        match = candidate;
+                        break;
+                    }
                 }
             }
 
