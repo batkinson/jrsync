@@ -23,21 +23,22 @@ public class BlockSearch {
 
     public BlockSearch(List<BlockDesc> basisDesc, int blockSize) {
         this.blockSize = blockSize;
-        buildBlockTable(basisDesc);
+        this.blockDescs = Collections.unmodifiableMap(buildBlockTable(basisDesc));
     }
 
-    private void buildBlockTable(List<BlockDesc> blocks) {
+    private Map<Long, List<BlockDesc>> buildBlockTable(List<BlockDesc> blocks) {
+        Map<Long, List<BlockDesc>> result = new HashMap<>();
         if (blocks != null) {
-            blockDescs = new HashMap<>();
             for (BlockDesc desc : blocks) {
-                List<BlockDesc> checksumHits = blockDescs.get(desc.weakChecksum);
+                List<BlockDesc> checksumHits = result.get(desc.weakChecksum);
                 if (checksumHits == null) {
                     checksumHits = new ArrayList<>();
-                    blockDescs.put(desc.weakChecksum, checksumHits);
+                    result.put(desc.weakChecksum, checksumHits);
                 }
                 checksumHits.add(desc);
             }
         }
+        return result;
     }
 
     private List<BlockDesc> matchingBlocks(long checksum) {
