@@ -6,7 +6,6 @@ import com.github.batkinson.jrsync.Metadata;
 import com.github.batkinson.jrsync.SearchHandler;
 
 import java.io.Closeable;
-import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,24 +64,6 @@ public class ZSync {
             return result;
         }
         throw new RuntimeException("invalid content range, expected start-end/total size");
-    }
-
-    /**
-     * Convenience method for reading {@link Metadata} from an {@link InputStream}.
-     *
-     * @param in stream to read from
-     * @return a non-null metadata object loaded from input
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
-    public static Metadata readMetadata(InputStream in) throws IOException, NoSuchAlgorithmException {
-        // Load the remote file's metadata
-        DataInputStream metaIn = new DataInputStream(buffer(in));
-        try {
-            return Metadata.read(metaIn);
-        } finally {
-            close(metaIn);
-        }
     }
 
     /**
