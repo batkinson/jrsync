@@ -421,7 +421,7 @@ class MultipartByteRangeInputStream extends InputStream implements RangeStream {
                 else
                     break;
             }
-            buf.append((char)b);  // Cast ok because HTTP headers are US-ASCII
+            buf.append((char) b);  // Cast ok because HTTP headers are US-ASCII
         }
         while (!(buf.length() >= CRLF.length() && (crlfIndex = buf.indexOf(CRLF, buf.length() - CRLF.length())) >= 0) &&
                 !(buf.length() >= LF.length() && (lfIndex = buf.indexOf(LF, buf.length() - LF.length())) >= 0));
