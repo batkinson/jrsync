@@ -130,20 +130,21 @@ public class ZSync {
      * remote content. It assumes the server will return ranges in order
      * requested. It also does *not* close the basis file.
      */
-    static void buildFile(Metadata metadata, RandomAccessFile basis, Map<Long, Long> matches, RangeStream input, OutputStream output) throws IOException {
-        if (input == null)
-            input = new EmptyRangeStream();
+    static void buildFile(Metadata metadata, RandomAccessFile basis, Map<Long, Long> matches, RangeStream remoteInput, OutputStream output) throws IOException {
+        if (remoteInput == null)
+            remoteInput = new EmptyRangeStream();
+        BlockReadable localInput = new RandomAccessBlockReadable(basis);
         int blockSize = metadata.getBlockSize();
         Range nextRange;
         long offset = 0;
         while (offset < metadata.getFileSize()) {
             if (matches.containsKey(offset)) {
                 basis.seek(matches.get(offset));
-                copy(new RandomAccessBlockReadable(basis), output, blockSize);
+                copy(localInput, output, blockSize);
                 offset += blockSize;
-            } else if ((nextRange = input.next()) != null && offset == nextRange.first) {
+            } else if ((nextRange = remoteInput.next()) != null && offset == nextRange.first) {
                 int rangeLength = (int) (nextRange.last - nextRange.first) + 1;
-                copy(input, output, rangeLength);
+                copy(remoteInput, output, rangeLength);
                 offset += rangeLength;
             } else
                 throw new RuntimeException("no content for offset: " + offset);
