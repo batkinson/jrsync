@@ -359,12 +359,11 @@ class ContentRangeStream implements RangeStream {
 
     @Override
     public Range next() throws IOException {
+        Range result = range;
         if (range != null) {
-            Range tmp = range;
             range = null;  // Only return a range once
-            return tmp;
         }
-        return range;
+        return result;
     }
 
     @Override
