@@ -57,7 +57,7 @@ public class ZSync {
      */
     static long[] parseContentRange(String contentRange) {
         Matcher m = CONTENT_RANGE_PATTERN.matcher(contentRange);
-        if (m.lookingAt()) {
+        if (m.find()) {
             int groups = m.groupCount();
             long[] result = new long[groups];
             for (int i = 1; i <= groups; i++)
@@ -419,7 +419,7 @@ class MultipartByteRangeInputStream extends InputStream implements RangeStream {
     public MultipartByteRangeInputStream(InputStream input, String contentTypeHeader) {
         this.input = buffer(input);
         Matcher m = BOUNDARY_PATTERN.matcher(contentTypeHeader);
-        if (m.lookingAt()) {
+        if (m.find()) {
             boundary = "--" + m.group(1);
             finalBoundary = boundary + "--";
         } else
