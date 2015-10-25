@@ -410,7 +410,7 @@ class ContentRangeStream implements RangeStream {
 class MultipartByteRangeInputStream extends InputStream implements RangeStream {
 
     private static final Pattern BOUNDARY_PATTERN = Pattern.compile("boundary=(\\S+)");
-    private static final String CRLF = "\r\n";
+    private static final String CRLF = "\r\n", LF = "\n";
 
     private InputStream input;
     private Map<String, String> headers = Collections.emptyMap();
@@ -434,21 +434,27 @@ class MultipartByteRangeInputStream extends InputStream implements RangeStream {
     private String readLine() throws IOException {
 
         StringBuilder buf = new StringBuilder();
-        int crlfIndex = -1;
+        int crlfIndex = -1, lfIndex = -1;
 
         // Scan until we hit a carriage return/line feed combo
         do {
             byte b = (byte) input.read();
-            if (b < 0)
-                break;
-            buf.append(b);
+            if (b < 0) {
+                if (buf.length() == 0)
+                    throw new EOFException();
+                else
+                    break;
+            }
+            buf.append((char)b);  // Cast ok because HTTP headers are US-ASCII
         }
-        while (buf.length() < CRLF.length() ||
-                (crlfIndex = buf.indexOf(CRLF, buf.length() - CRLF.length())) < 0);
+        while (!(buf.length() >= CRLF.length() && (crlfIndex = buf.indexOf(CRLF, buf.length() - CRLF.length())) >= 0) &&
+                !(buf.length() >= LF.length() && (lfIndex = buf.indexOf(LF, buf.length() - LF.length())) >= 0));
 
         // Chop off the endline
         if (crlfIndex >= 0) {
             buf.delete(crlfIndex, buf.length());
+        } else if (lfIndex >= 0) {
+            buf.delete(lfIndex, buf.length());
         }
 
         return buf.toString();
