@@ -478,8 +478,8 @@ class MultipartByteRangeInputStream extends InputStream implements RangeStream {
 
         // Parse headers until empty line
         if (boundary.equals(headerLine)) {
-            while (!"".equals((headerLine = readLine()))) {
-                String[] header = headerLine.split(":", 1);
+            while (!"".equals(headerLine = readLine())) {
+                String[] header = headerLine.split("[:]\\s+", 2);
                 String headerName = header[0], headerValue = header[1];
                 headers.put(headerName, headerValue);
                 if ("Content-Range".equals(headerName)) {
