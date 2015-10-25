@@ -68,7 +68,8 @@ public class ZSync {
 
     /**
      * Performs a remote file synchronization using remote metadata and an http
-     * range request.
+     * range request. Note client code is responsible for closing the basis
+     * file this method *does not* close it.
      *
      * @param metadata       describes remote file
      * @param basis          local file to search for matching content
@@ -88,9 +89,10 @@ public class ZSync {
         Analyzer analyzer = new Analyzer(metadata);
         search.zsyncSearch(basis, metadata.getFileSize(), metadata.getBlockHashAlg(), analyzer);
 
-        if (analyzer.remoteBytes() > 0) {
-            RangeRequest req = null;
-            try {
+        RangeRequest req = null;
+        RangeStream input = null;
+        try {
+            if (analyzer.remoteBytes() > 0) {
                 req = requestFactory.create();
                 req.setHeader(RANGE_HEADER, "bytes=" +
                         toRangeString(analyzer.getRemoteRanges()));
@@ -104,25 +106,19 @@ public class ZSync {
                     throw new RuntimeException(
                             "expected " + SC_PARTIAL_CONTENT + ", was: " + status);
 
-                RangeStream input;
                 if (contentRange != null) {
                     input = new ContentRangeStream(bodyIn, contentRange);
                 } else if (contentType != null && contentType.contains(MULTIPART_BYTERANGES_MIME_TYPE)) {
                     input = new MultipartByteRangeInputStream(bodyIn, contentType);
                 } else
                     throw new RuntimeException("expected http range content for single or multiple ranges");
-
-                buildFile(metadata, basis, analyzer.getMatches(), input, digestOut);
-
-            } finally {
-                close(req);
             }
-        } else {
-            // Can construct file with only local content
-            buildFile(metadata, basis, analyzer.getMatches(), new EmptyRangeStream(), digestOut);
-        }
 
-        close(digestOut);
+            buildFile(metadata, basis, analyzer.getMatches(), input, digestOut);
+
+        } finally {
+            close(input, req, digestOut);
+        }
 
         if (!Arrays.equals(metadata.getFileHash(), digest.digest())) {
             throw new RuntimeException("constructed file doesn't match metadata");
@@ -131,9 +127,8 @@ public class ZSync {
 
     /**
      * Constructs a file from matching local content and multiple ranges of
-     * remote content.
-     * <p/>
-     * This assumes the server will return ranges in order requested.
+     * remote content. It assumes the server will return ranges in order
+     * requested. It also does *not* close the basis file.
      */
     static void buildFile(Metadata metadata, RandomAccessFile basis, Map<Long, Long> matches, RangeStream input, OutputStream output) throws IOException {
         if (input == null)
