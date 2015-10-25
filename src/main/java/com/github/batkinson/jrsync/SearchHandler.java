@@ -3,9 +3,9 @@ package com.github.batkinson.jrsync;
 import java.io.IOException;
 
 /**
- * The contract for handling block search results. The methods should always be called in the byte
- * order of the target file (the one being searched), which can be important for stream-based ops
- * such as compression, etc.
+ * The contract for handling block search results. Methods may be called out of
+ * byte order depending on the search performed. See {@link BlockSearch} for
+ * more details.
  */
 public interface SearchHandler {
     void matched(long startOffset, BlockDesc match) throws IOException;

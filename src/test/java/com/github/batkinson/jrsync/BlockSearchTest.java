@@ -80,7 +80,7 @@ public class BlockSearchTest {
         final BlockSearch search = new BlockSearch(computeBlocks(basis, blockSize, MD5), blockSize);
         File tempFile = File.createTempFile(name + "-" + blockSize + "-", "", outputDir);
         FilePatcher patcher = new FilePatcher(blockSize, basis, target, tempFile);
-        search.execute(target, MD5, patcher);
+        search.rsyncSearch(target, MD5, patcher);
         assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
         assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
     }

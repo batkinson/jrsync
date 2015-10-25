@@ -7,6 +7,7 @@ import com.github.batkinson.jrsync.SearchHandler;
 
 import java.io.Closeable;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -104,7 +105,7 @@ public class ZSync {
         // Perform block search for remote content in local file
         BlockSearch search = new BlockSearch(metadata.getBlockDescs(), metadata.getBlockSize());
         Analyzer analyzer = new Analyzer(metadata);
-        search.execute(basis, metadata.getBlockHashAlg(), analyzer);
+        search.zsyncSearch(basis, metadata.getFileSize(), metadata.getBlockHashAlg(), analyzer);
 
         if (analyzer.remoteBytes() > 0) {
             RangeRequest req = null;
@@ -254,6 +255,7 @@ class Analyzer implements SearchHandler {
     // Maps remote block index to offset of matching content in local file
     private final Map<Long, Long> matches = new HashMap<>();
     private final Metadata metadata;
+    private final List<Range> required = new ArrayList<>();
 
     Analyzer(Metadata metadata) {
         this.metadata = metadata;
@@ -266,7 +268,7 @@ class Analyzer implements SearchHandler {
 
     @Override
     public void unmatched(long start, long end) throws IOException {
-        // Unmatched local content isn't meaningful for our purposes
+        appendRange(required, start, end - 1);
     }
 
     public Map<Long, Long> getMatches() {
@@ -291,25 +293,6 @@ class Analyzer implements SearchHandler {
      * The minimal list of remote byte ranges required in ascending byte order.
      */
     public List<Range> getRemoteRanges() {
-
-        List<Range> required = new ArrayList<>();
-
-        // Add missing block content ranges
-        long blockSize = metadata.getBlockSize();
-        for (BlockDesc d : metadata.getBlockDescs()) {
-            long blockOffset = d.getBlockIndex() * blockSize;
-            if (!matches.containsKey(blockOffset)) {
-                appendRange(required, blockOffset, blockOffset + (blockSize - 1));
-            }
-        }
-
-        // Add remaining trailing content, if any
-        long blockBytes = blockSize * metadata.getBlockDescs().size();
-        long remainder = metadata.getFileSize() - blockBytes;
-        if (remainder > 0) {
-            appendRange(required, blockBytes, metadata.getFileSize() - 1);
-        }
-
         return required;
     }
 }
