@@ -7,8 +7,9 @@
 
     <groupId>com.github.batkinson</groupId>
     <artifactId>jrsync</artifactId>
-    <name>JRsync</name>
     <version>1.0-SNAPSHOT</version>
+
+    <name>JRsync</name>
     <description>
         A minimial android-compatible synchronization tool for transferring files. It is based on
         the rsync algorithm, not the rsync command, to utilize minimal dependencies.
