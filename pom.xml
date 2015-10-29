@@ -14,6 +14,28 @@
         A minimial android-compatible synchronization tool for transferring files. It is based on
         the rsync algorithm, not the rsync command, to utilize minimal dependencies.
     </description>
+    <url>https://github.com/batkinson/JRsync</url>
+
+    <developers>
+        <developer>
+            <name>Brent Atkinson</name>
+            <email>brent.atkinson@gmail.com</email>
+            <organizationUrl>https://github.com/batkinson</organizationUrl>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/batkinson/JRsync</url>
+        <connection>scm:git:https://github.com/batkinson/JRsync.git</connection>
+        <developerConnection>scm:git:git@github.com:batkinson/JRsync.git</developerConnection>
+    </scm>
 
     <dependencies>
         <dependency>
