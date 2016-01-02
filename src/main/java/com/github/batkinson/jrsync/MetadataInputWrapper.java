@@ -20,9 +20,14 @@ public class MetadataInputWrapper extends InputStream {
 
     public MetadataInputWrapper(InputStream wrapped, String source, int blockSize, String fileHashAlg, String blockHashAlg)
             throws NoSuchAlgorithmException, IOException {
+        this(wrapped, source, blockSize, fileHashAlg, blockHashAlg, null);
+    }
+
+    public MetadataInputWrapper(InputStream wrapped, String source, int blockSize, String fileHashAlg, String blockHashAlg,
+                                File metadataDir) throws NoSuchAlgorithmException, IOException {
         this.wrapped = wrapped;
         generator = new MetadataGenerator(source, blockSize, fileHashAlg, blockHashAlg);
-        metadataFile = File.createTempFile("miw", Metadata.FILE_EXT);
+        metadataFile = File.createTempFile("miw", Metadata.FILE_EXT, metadataDir);
         metadata = new RandomAccessFile(metadataFile, "rw");
         generator.setHandler(new MetadataWriter(metadata));
     }

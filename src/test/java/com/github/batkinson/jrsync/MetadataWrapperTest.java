@@ -19,6 +19,7 @@ import static com.github.batkinson.jrsync.TestUtils.inputStream;
 import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -55,7 +56,7 @@ public class MetadataWrapperTest {
     }
 
     @Test
-    public void testInputWrapper() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+    public void testInputWrapperDefaultDir() throws IOException, NoSuchAlgorithmException, URISyntaxException {
         MetadataInputWrapper in = new MetadataInputWrapper(new BufferedInputStream(inputStream(contentFile)), SOURCE, BLOCK_SIZE, FILE_ALG, BLOCK_ALG);
         OutputStream out = new BufferedOutputStream(new FileOutputStream(contentOutput));
         copy(in, out);
@@ -63,11 +64,31 @@ public class MetadataWrapperTest {
     }
 
     @Test
-    public void testOutputWrapper() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+    public void testInputWrapperSpecifiedDir() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+        MetadataInputWrapper in = new MetadataInputWrapper(new BufferedInputStream(inputStream(contentFile)), SOURCE, BLOCK_SIZE, FILE_ALG, BLOCK_ALG, outputDir);
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(contentOutput));
+        copy(in, out);
+        File metadataFile = in.getMetadataFile();
+        assertResult(metadataFile, contentOutput);
+        assertEquals(outputDir, metadataFile.getParentFile());
+    }
+
+    @Test
+    public void testOutputWrapperDefaultDir() throws IOException, NoSuchAlgorithmException, URISyntaxException {
         MetadataOutputWrapper out = new MetadataOutputWrapper(new BufferedOutputStream(new FileOutputStream(contentOutput)), SOURCE, BLOCK_SIZE, FILE_ALG, BLOCK_ALG);
         InputStream in = new BufferedInputStream(inputStream(contentFile));
         copy(in, out);
         assertResult(out.getMetadataFile(), contentOutput);
+    }
+
+    @Test
+    public void testOutputWrapperSpecifiedDir() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+        MetadataOutputWrapper out = new MetadataOutputWrapper(new BufferedOutputStream(new FileOutputStream(contentOutput)), SOURCE, BLOCK_SIZE, FILE_ALG, BLOCK_ALG, outputDir);
+        InputStream in = new BufferedInputStream(inputStream(contentFile));
+        copy(in, out);
+        File metadataFile = out.getMetadataFile();
+        assertResult(metadataFile, contentOutput);
+        assertEquals(outputDir, metadataFile.getParentFile());
     }
 
     private void copy(InputStream in, OutputStream out) throws IOException {
