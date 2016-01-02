@@ -19,7 +19,9 @@ public class MetadataGenerator {
 
     public interface Handler {
         void header(String fileHashAlg, int fileHashLength, String source, String blockHashAlg, int blockHashLength, int blockSize) throws IOException;
+
         void block(long checksum, byte[] digest) throws IOException;
+
         void complete(long fileSize, byte[] digest) throws IOException;
     }
 

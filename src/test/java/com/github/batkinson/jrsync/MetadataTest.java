@@ -12,8 +12,8 @@ import java.security.NoSuchAlgorithmException;
 
 import static com.github.batkinson.jrsync.TestUtils.computeChecksum;
 import static com.github.batkinson.jrsync.TestUtils.computeHash;
-import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.inputStream;
+import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -83,10 +83,10 @@ public class MetadataTest {
         assertEquals("nowhere", metadata.getContentSource());
         assertEquals("MD5", metadata.getBlockHashAlg());
         assertEquals(100, metadata.getBlockSize());
-        int expectedBlocks = (int)file2.length() / metadata.getBlockSize();
+        int expectedBlocks = (int) file2.length() / metadata.getBlockSize();
         assertEquals(expectedBlocks, metadata.getBlockDescs().size());
 
-        for (int i=0; i<metadata.getBlockDescs().size(); i++) {
+        for (int i = 0; i < metadata.getBlockDescs().size(); i++) {
             BlockDesc bd = metadata.getBlockDescs().get(i);
             assertEquals(i, bd.blockIndex);
             assertEquals(computeChecksum(file2, metadata.getBlockSize(), i * metadata.getBlockSize()), bd.weakChecksum);

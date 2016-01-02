@@ -1,10 +1,15 @@
 package com.github.batkinson.jrsync;
+
 import org.junit.Test;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 
 public class MetadataGeneratorTest {
@@ -12,7 +17,7 @@ public class MetadataGeneratorTest {
     @Test
     public void defaultHandlerNoException() throws IOException, NoSuchAlgorithmException {
         MetadataGenerator generator = new MetadataGenerator("", 1, "SHA1", "MD5");
-        generator.add((byte)0);
+        generator.add((byte) 0);
         generator.finish();
         generator.reset();
     }

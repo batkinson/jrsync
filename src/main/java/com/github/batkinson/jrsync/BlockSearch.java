@@ -54,9 +54,9 @@ public class BlockSearch {
      * methods are guaranteed to be called in the byte order of the target file
      * so it is possible to handle the file in a single, serial pass.
      *
-     * @param target the file to generate using bytes from basis summary
+     * @param target          the file to generate using bytes from basis summary
      * @param digestAlgorithm hash algorithm to use for block equality
-     * @param handler the object that handles search output
+     * @param handler         the object that handles search output
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
@@ -139,9 +139,9 @@ public class BlockSearch {
      * was created. Handler methods are *not* guaranteed to be called in target
      * byte order. Matches are handled in order, then unmatched content in order.
      *
-     * @param basis the local file used to build remote target
+     * @param basis           the local file used to build remote target
      * @param digestAlgorithm hash algorithm to use for block equality
-     * @param handler the object that handles search output
+     * @param handler         the object that handles search output
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */

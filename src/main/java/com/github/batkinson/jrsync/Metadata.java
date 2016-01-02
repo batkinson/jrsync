@@ -62,7 +62,7 @@ public class Metadata {
     public static void generate(String contentSource, int blockSize, String fileHashAlg, String blockHashAlg, InputStream source, File metadata) throws IOException, NoSuchAlgorithmException {
         MetadataInputWrapper out = new MetadataInputWrapper(new BufferedInputStream(source), contentSource, blockSize, fileHashAlg, blockHashAlg);
         try {
-            while (out.read() >= 0);
+            while (out.read() >= 0) ;
         } finally {
             out.close();
             out.getMetadataFile().renameTo(metadata);
