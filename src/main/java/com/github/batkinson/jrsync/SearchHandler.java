@@ -8,6 +8,7 @@ import java.io.IOException;
  * more details.
  */
 public interface SearchHandler {
+    void searched(int percent) throws IOException;
     void matched(long startOffset, BlockDesc match) throws IOException;
     void unmatched(long startOffset, long endOffset) throws IOException;
 }

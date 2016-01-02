@@ -30,6 +30,9 @@ class FilePatcher implements SearchHandler {
     }
 
     @Override
+    public void searched(int percent) throws IOException { }
+
+    @Override
     public void matched(long offset, BlockDesc match) throws IOException {
         long start = match.blockIndex * blockSize, end = start + blockSize, size = end - start;
         bytesMatched += size;

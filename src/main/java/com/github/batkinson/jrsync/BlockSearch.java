@@ -64,6 +64,7 @@ public class BlockSearch {
 
         Map<Long, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
         long interimStart = 0;
+        long targetLength = target.length();
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
 
@@ -75,7 +76,7 @@ public class BlockSearch {
             target.readFully(blockBuf);
             sb.add(blockBuf);
         } catch (EOFException eof) {
-            unmatched(handler, interimStart, target.length());
+            unmatched(handler, interimStart, targetLength);
             return;
         }
 
@@ -92,6 +93,8 @@ public class BlockSearch {
                     }
                 }
             }
+
+            searched(handler, sb.position() + sb.length(), targetLength);
 
             try {
                 if (match != null) {
@@ -113,6 +116,7 @@ public class BlockSearch {
                     sb.add(next);
                 }
             } catch (EOFException eof) {
+                searched(handler, targetLength, targetLength);
                 unmatched(handler, interimStart, target.length());
                 return;
             }
@@ -123,6 +127,10 @@ public class BlockSearch {
         if (start < end) {
             handler.unmatched(start, end);
         }
+    }
+
+    private void searched(SearchHandler handler, long filePos, long fileLength) throws IOException {
+        handler.searched((int) ((double) filePos / (fileLength == 0 ? 1 : fileLength) * 100));
     }
 
     /**
@@ -145,6 +153,7 @@ public class BlockSearch {
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
 
+        long basisLength = basis.length();
         long matchedBlocks = 0;
 
         basis.seek(0);
@@ -174,6 +183,8 @@ public class BlockSearch {
                     }
                 }
 
+                searched(handler, sb.position() + sb.length(), basisLength);
+
                 if (blockMatched) {
                     // Advance through next block, throws at end-of-file
                     basis.readFully(blockBuf);
@@ -184,7 +195,9 @@ public class BlockSearch {
                 }
             }
 
-        } catch (EOFException eof) { }
+        } catch (EOFException eof) {
+            searched(handler, basisLength, basisLength);
+        }
 
         // Scan block summary of target and notify handler of unmatched
         // Avoids O(n) when every block has same content by using sets

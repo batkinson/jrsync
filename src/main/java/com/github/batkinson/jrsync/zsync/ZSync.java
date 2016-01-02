@@ -78,7 +78,27 @@ public class ZSync {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
-    public static void sync(Metadata metadata, RandomAccessFile basis, File target, RangeRequestFactory requestFactory) throws NoSuchAlgorithmException, IOException {
+    public static void sync(Metadata metadata, RandomAccessFile basis, File target, RangeRequestFactory requestFactory)
+            throws IOException, NoSuchAlgorithmException {
+        sync(metadata, basis, target, requestFactory, null);
+    }
+
+    /**
+     * Performs a remote file synchronization using remote metadata and an http
+     * range request. Note client code is responsible for closing the basis
+     * file this method *does not* close it.
+     *
+     * @param metadata       describes remote file
+     * @param basis          local file to search for matching content
+     * @param target         file that will be written as a result
+     * @param requestFactory factory to create http range request
+     * @param tracker        event handler for progress updates, null for no tracking
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
+    public static void sync(Metadata metadata, RandomAccessFile basis, File target,
+                            RangeRequestFactory requestFactory, ProgressTracker tracker)
+            throws NoSuchAlgorithmException, IOException {
 
         MessageDigest digest = MessageDigest.getInstance(metadata.getFileHashAlg());
         DigestOutputStream digestOut = new DigestOutputStream(
@@ -87,6 +107,8 @@ public class ZSync {
         // Perform block search for remote content in local file
         BlockSearch search = new BlockSearch(metadata.getBlockDescs(), metadata.getBlockSize());
         Analyzer analyzer = new Analyzer(metadata);
+        if (tracker != null)
+            analyzer.setTracker(tracker);
         search.zsyncSearch(basis, metadata.getFileSize(), metadata.getBlockHashAlg(), analyzer);
 
         RangeRequest req = null;
@@ -114,7 +136,7 @@ public class ZSync {
                     throw new RuntimeException("expected http range content for single or multiple ranges");
             }
 
-            buildFile(metadata, basis, analyzer.getMatches(), input, digestOut);
+            buildFile(metadata, basis, analyzer.getMatches(), input, digestOut, tracker);
 
         } finally {
             close(input, req, digestOut);
@@ -130,14 +152,18 @@ public class ZSync {
      * remote content. It assumes the server will return ranges in order
      * requested. It also does *not* close the basis file.
      */
-    static void buildFile(Metadata metadata, RandomAccessFile basis, Map<Long, Long> matches, RangeStream remoteInput, OutputStream output) throws IOException {
+    static void buildFile(Metadata metadata, RandomAccessFile basis, Map<Long, Long> matches, RangeStream remoteInput,
+                          OutputStream output, ProgressTracker tracker) throws IOException {
         if (remoteInput == null)
             remoteInput = new EmptyRangeStream();
         BlockReadable localInput = new RandomAccessBlockReadable(basis);
         int blockSize = metadata.getBlockSize();
+        long offset = 0, targetSize = metadata.getFileSize();
         Range nextRange;
-        long offset = 0;
-        while (offset < metadata.getFileSize()) {
+        while (offset < targetSize) {
+            if (tracker != null) {
+                tracker.onProgress(ProgressTracker.Stage.BUILD, (int) ((double) offset / (targetSize == 0 ? 1 : targetSize) * 100));
+            }
             if (matches.containsKey(offset)) {
                 basis.seek(matches.get(offset));
                 copy(localInput, output, blockSize);
@@ -233,9 +259,20 @@ class Analyzer implements SearchHandler {
     private final Map<Long, Long> matches = new HashMap<>();
     private final Metadata metadata;
     private final List<Range> required = new ArrayList<>();
+    private ProgressTracker tracker;
 
     Analyzer(Metadata metadata) {
         this.metadata = metadata;
+    }
+
+    public void setTracker(ProgressTracker tracker) {
+        this.tracker = tracker;
+    }
+
+    @Override
+    public void searched(int percent) throws IOException {
+        if (tracker != null)
+            tracker.onProgress(ProgressTracker.Stage.SEARCH, percent);
     }
 
     @Override

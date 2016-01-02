@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.github.batkinson.jrsync.TestUtils.randomAccess;
@@ -20,6 +22,8 @@ import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static com.github.batkinson.jrsync.zsync.IOUtil.close;
 import static com.github.batkinson.jrsync.zsync.ZSync.SC_PARTIAL_CONTENT;
 import static com.github.batkinson.jrsync.zsync.ZSync.sync;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ZSyncTest {
 
@@ -87,9 +91,42 @@ public class ZSyncTest {
         sync(file1Single, file1, tempFile("exact-sb"), factory);
     }
 
+    class TestTracker implements ProgressTracker {
+        Map<Stage, List<Integer>> calls = new HashMap<>();
+
+        @Override
+        public void onProgress(Stage stage, int percentComplete) {
+            if (!calls.containsKey(stage))
+                calls.put(stage, new ArrayList<Integer>());
+            calls.get(stage).add(percentComplete);
+        }
+
+        void assertCorrect() {
+            for (ProgressTracker.Stage stage : ProgressTracker.Stage.values()) {
+                List<Integer> calls = this.calls.get(stage);
+                assertTrue("expected multiple progress calls", calls.size() > 1);
+                boolean valuesSame = true;
+                for (int i = 1; i < calls.size(); i++) {
+                    Integer v1 = calls.get(i - 1).intValue(), v2 = calls.get(i).intValue();
+                    assertTrue("expected progress never decreases", v2 >= v1);
+                    if (v1 != v2)
+                        valuesSame = false;
+                }
+                assertFalse("expected progress values aren't all the same", valuesSame);
+            }
+        }
+    }
+
     @Test
     public void exactMultipleBlocks() throws IOException, NoSuchAlgorithmException {
         sync(file1Multiple, file1, tempFile("exact-mb"), factory);
+    }
+
+    @Test
+    public void progressTracker() throws IOException, NoSuchAlgorithmException {
+        TestTracker tracker = new TestTracker();
+        sync(file1Multiple, file1, tempFile("exact-mb"), factory, tracker);
+        tracker.assertCorrect();
     }
 
 
