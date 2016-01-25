@@ -3,7 +3,10 @@ package com.github.batkinson.jrsync;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+import static com.github.batkinson.jrsync.TestUtils.blockStr;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -74,5 +77,38 @@ public class SearchBufferTest {
         assertArrayEquals(Arrays.copyOfRange(items, 2, 4), buf.getBlock(new byte[2]));
         buf.add(items[4]);
         assertArrayEquals(Arrays.copyOfRange(items, 3, 5), buf.getBlock(new byte[2]));
+    }
+
+    @Test
+    public void blocksMatchWithInsert() {
+
+        int blockSize = 2;
+        SearchBuffer b1 = new SearchBuffer(blockSize), b2 = new SearchBuffer(blockSize);
+
+        byte[][] target = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 0}};
+        byte[][] source = {{1, 2}, {3, 0}, {4}, {5, 6}, {7, 8}, {9, 0}};
+
+        byte[] tmp = {0, 0};
+
+        // compute expected target
+        Set<String> expected = new HashSet<>();
+        for (int i = 0; i < target.length; i++) {
+            b1.add(target[i]);
+            if (i != 1) {
+                expected.add(blockStr(b1.checksum(), b1.getBlock(tmp)));
+            }
+        }
+
+        // compute matches
+        Set<String> matched = new HashSet<>();
+        for (int i = 0; i < source.length; i++) {
+            b2.add(source[i]);
+            String bd = blockStr(b2.checksum(), b2.getBlock(tmp));
+            if (expected.contains(bd)) {
+                matched.add(bd);
+            }
+        }
+
+        assertEquals(expected, matched);
     }
 }

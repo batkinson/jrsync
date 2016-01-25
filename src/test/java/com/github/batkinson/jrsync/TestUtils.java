@@ -192,4 +192,8 @@ public class TestUtils {
         }
         System.out.printf("file: %d bytes, digest: %s%n", file.length(), toHex(fileDigest.digest()));
     }
+
+    public static String blockStr(long checksum, byte[] content) {
+        return String.format("checksum: '%d', content: '%s'", checksum, TestUtils.toHex(content));
+    }
 }
