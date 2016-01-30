@@ -17,12 +17,14 @@ class FilePatcher implements SearchHandler {
     private RandomAccessFile target;
     private long bytesMatched = 0;
     private long bytesNeeded = 0;
+    private boolean reverse;
 
-    FilePatcher(int blockSize, RandomAccessFile basis, RandomAccessFile target, File dest) throws IOException {
+    FilePatcher(int blockSize, RandomAccessFile basis, RandomAccessFile target, File dest, boolean reverse) throws IOException {
         this.blockSize = blockSize;
         this.dest = new RandomAccessFile(dest, "rw");
         this.basis = basis;
         this.target = target;
+        this.reverse = reverse;
     }
 
     public RandomAccessFile getDest() {
@@ -35,9 +37,10 @@ class FilePatcher implements SearchHandler {
 
     @Override
     public void matched(long offset, BlockDesc match) throws IOException {
-        long start = match.blockIndex * blockSize, end = start + blockSize, size = end - start;
+        long start = reverse ? offset : match.blockIndex * blockSize;
+        long end = start + blockSize, size = end - start;
         bytesMatched += size;
-        dest.seek(offset);
+        dest.seek(reverse ? match.blockIndex * blockSize : offset);
         copyRange(basis, start, end, dest);
     }
 
