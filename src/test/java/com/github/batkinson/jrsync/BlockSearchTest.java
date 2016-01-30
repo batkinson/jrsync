@@ -29,6 +29,7 @@ public class BlockSearchTest {
     RandomAccessFile file2;
     RandomAccessFile violin;
     RandomAccessFile guitar;
+    RandomAccessFile file6;
 
     @Before
     public void setup() throws URISyntaxException, FileNotFoundException {
@@ -40,6 +41,7 @@ public class BlockSearchTest {
         file2 = randomAccess(testFile("file2.txt"));
         violin = randomAccess(testFile("violin.jpg"));
         guitar = randomAccess(testFile("guitar.jpg"));
+        file6 = randomAccess(testFile("file6.txt"));
     }
 
     @After
@@ -96,6 +98,12 @@ public class BlockSearchTest {
     public void zsyncBinaryIdentical() throws IOException, NoSuchAlgorithmException {
         assertSearch(191, "zbi", guitar, guitar, true);
     }
+
+    @Test
+    public void zsyncPoisonByte() throws IOException, NoSuchAlgorithmException {
+        assertSearch(10, "zpb", file6, file1, true);
+    }
+
 
     private void assertSearch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target, boolean reverse) throws IOException, NoSuchAlgorithmException {
         final BlockSearch search = new BlockSearch(computeBlocks(reverse ? target : basis, blockSize, MD5), blockSize);
