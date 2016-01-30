@@ -54,28 +54,28 @@ public class BlockSearchTest {
     }
 
     @Test
-    public void execute() throws IOException, NoSuchAlgorithmException {
+    public void rsyncDifferentBlockSizes() throws IOException, NoSuchAlgorithmException {
         for (int blockSize : Arrays.asList(1, 13, (int) file1.length(), (int) file2.length(), 1100)) {
-            assertPatch(blockSize, "bstfile", file1, file2);
+            assertRsync(blockSize, "rdbs", file1, file2);
         }
     }
 
     @Test
-    public void makeViolinIntoGuitar() throws IOException, NoSuchAlgorithmException {
-        assertPatch(191, "bstvig", violin, guitar);
+    public void rsyncBinaryBigToSmall() throws IOException, NoSuchAlgorithmException {
+        assertRsync(191, "rbbts", violin, guitar);
     }
 
     @Test
-    public void makeGuitarIntoViolin() throws IOException, NoSuchAlgorithmException {
-        assertPatch(191, "bstgiv", guitar, violin);
+    public void rsyncBinarySmallToBig() throws IOException, NoSuchAlgorithmException {
+        assertRsync(191, "rbstb", guitar, violin);
     }
 
     @Test
-    public void makeGuitarIntoGuitar() throws IOException, NoSuchAlgorithmException {
-        assertPatch(191, "bstgig", guitar, guitar);
+    public void rsyncBinaryIdentical() throws IOException, NoSuchAlgorithmException {
+        assertRsync(191, "rbi", guitar, guitar);
     }
 
-    private void assertPatch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target)
+    private void assertRsync(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target)
             throws IOException, NoSuchAlgorithmException {
         final BlockSearch search = new BlockSearch(computeBlocks(basis, blockSize, MD5), blockSize);
         File tempFile = File.createTempFile(name + "-" + blockSize + "-", "", outputDir);
