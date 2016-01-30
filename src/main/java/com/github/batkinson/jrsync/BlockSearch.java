@@ -140,6 +140,7 @@ public class BlockSearch {
      * byte order. Matches are handled in order, then unmatched content in order.
      *
      * @param basis           the local file used to build remote target
+     * @param targetLength    size of the file to construct in bytes, used to handle trailing content
      * @param digestAlgorithm hash algorithm to use for block equality
      * @param handler         the object that handles search output
      * @throws IOException
