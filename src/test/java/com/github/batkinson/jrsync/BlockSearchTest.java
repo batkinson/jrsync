@@ -84,5 +84,36 @@ public class BlockSearchTest {
         assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
         assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
     }
-}
 
+    @Test
+    public void zsyncDifferentBlockSizes() throws IOException, NoSuchAlgorithmException {
+        for (int blockSize : Arrays.asList(1, 13, (int) file1.length(), (int) file2.length(), 1100)) {
+            assertRsync(blockSize, "zdbs", file1, file2);
+        }
+    }
+
+    @Test
+    public void zsyncBinaryBigToSmall() throws IOException, NoSuchAlgorithmException {
+        assertZsync(191, "zbbts", violin, guitar);
+    }
+
+    @Test
+    public void zsyncBinarySmallToBig() throws IOException, NoSuchAlgorithmException {
+        assertZsync(191, "zbstb", guitar, violin);
+    }
+
+    @Test
+    public void zsyncBinaryIdentical() throws IOException, NoSuchAlgorithmException {
+        assertZsync(191, "zbi", guitar, guitar);
+    }
+
+    private void assertZsync(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target)
+            throws IOException, NoSuchAlgorithmException {
+        final BlockSearch search = new BlockSearch(computeBlocks(target, blockSize, MD5), blockSize);
+        File tempFile = File.createTempFile(name + "-" + blockSize + "-", "", outputDir);
+        FilePatcher patcher = new FilePatcher(blockSize, basis, target, tempFile);
+        search.zsyncSearch(basis, target.length(), MD5, patcher);
+        assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
+        assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());
+    }
+}
