@@ -48,7 +48,7 @@ public class RollingChecksum implements Checksum {
     }
 
     public long getValue() {
-        return a + (b << POW2);
+        return a + (b << POW2) & 0xFFFFFFFFL;
     }
 
     public void reset() {
