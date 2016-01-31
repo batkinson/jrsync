@@ -16,6 +16,7 @@ import static com.github.batkinson.jrsync.TestUtils.computeBlocks;
 import static com.github.batkinson.jrsync.TestUtils.computeHash;
 import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
+import static com.github.batkinson.jrsync.zsync.IOUtil.close;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -46,13 +47,7 @@ public class BlockSearchTest {
 
     @After
     public void teardown() {
-        for (RandomAccessFile f : Arrays.asList(file1, file2, violin, guitar)) {
-            try {
-                f.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        close(file1, file2, violin, guitar, file6);
     }
 
     @Test
