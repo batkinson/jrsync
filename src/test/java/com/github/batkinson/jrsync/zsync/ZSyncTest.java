@@ -30,7 +30,7 @@ public class ZSyncTest {
     private TestRangeRequestFactory factory;
 
     File outputDir;
-    RandomAccessFile file1;
+    RandomAccessFile file1, file6;
     Metadata file1Single, file1Multiple, file1Uneven,
             file3Leading, file4Internal, file5Multiple;
 
@@ -41,6 +41,7 @@ public class ZSyncTest {
         outputDir.mkdirs();
 
         file1 = randomAccess(testFile("file1.txt"));
+        file6 = randomAccess(testFile("file6.txt"));
 
         file1Single = Metadata.read(randomAccess(testFile("file1.jrsmd")));
         file1Multiple = Metadata.read(randomAccess(testFile("file1-bs10.jrsmd")));
@@ -54,7 +55,7 @@ public class ZSyncTest {
 
     @After
     public void tearDown() {
-        close(file1);
+        close(file1, file6);
     }
 
     @Test
@@ -129,6 +130,11 @@ public class ZSyncTest {
         tracker.assertCorrect();
     }
 
+    @Test
+    public void poisonByte() throws IOException, NoSuchAlgorithmException {
+        setupResponse(SC_PARTIAL_CONTENT, "987654321\n", "Content-Range: bytes 40-49/1000");
+        sync(file1Multiple, file6, tempFile("poison-byte"), factory);
+    }
 
     private File tempFile(String test) throws IOException {
         return File.createTempFile(test, "", outputDir);
