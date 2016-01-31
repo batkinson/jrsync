@@ -87,7 +87,7 @@ public class Metadata {
 
         int completeBlocks = (int) (result.fileSize / result.blockSize);
         for (int i = 0; i < completeBlocks; i++) {
-            long checksum = in.readInt();
+            long checksum = in.readInt() & 0xFFFFFFFFL; // prevent sign extension (we're compressing)
             byte[] hash = new byte[blockHashSize];
             in.readFully(hash);
             result.blockDescs.add(new BlockDesc(i, checksum, hash));

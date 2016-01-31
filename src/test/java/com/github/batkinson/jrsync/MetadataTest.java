@@ -17,6 +17,7 @@ import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class MetadataTest {
 
@@ -93,4 +94,16 @@ public class MetadataTest {
             assertArrayEquals(computeHash(file2, metadata.getBlockHashAlg(), metadata.getBlockSize(), i * metadata.getBlockSize()), bd.cryptoHash);
         }
     }
+
+    @Test
+    public void nonNegativeChecksums() throws URISyntaxException, IOException, NoSuchAlgorithmException {
+        RandomAccessFile ref = randomAccess(testFile("file2.jrsmd"));
+        Metadata md = Metadata.read(ref);
+        for (BlockDesc d : md.getBlockDescs()) {
+            if (d.weakChecksum < 0) {
+                fail();
+            }
+        }
+    }
+
 }
