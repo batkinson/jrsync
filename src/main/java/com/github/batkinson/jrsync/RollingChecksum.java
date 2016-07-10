@@ -2,6 +2,8 @@ package com.github.batkinson.jrsync;
 
 import java.util.zip.Checksum;
 
+import static com.github.batkinson.jrsync.ByteUtils.unsignedByte;
+
 /**
  * Implementation of a rolling checksum as described in https://rsync.samba.org/tech_report/node3.html.
  */
@@ -23,14 +25,15 @@ public class RollingChecksum implements Checksum {
 
     @Override
     public void update(int value) {
-        value = value & 0xFF;
+        value = unsignedByte(value);
         if (size < buffer.length) {
             a = (a + value) & MOD_MASK;
             b = (b + ((buffer.length - (i + 1) + 1) * value)) & MOD_MASK;
             size++;
         } else {
-            a = ((a - buffer[i]) + value) & MOD_MASK;
-            b = (b - (buffer.length * buffer[i]) + a) & MOD_MASK;
+            int prevStart = unsignedByte(buffer[i]);
+            a = ((a - prevStart) + value) & MOD_MASK;
+            b = (b - (buffer.length * prevStart) + a) & MOD_MASK;
         }
         buffer[i] = (byte) value;
         i = (i + 1) % buffer.length;

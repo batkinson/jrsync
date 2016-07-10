@@ -2,6 +2,13 @@ package com.github.batkinson.jrsync;
 
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.net.URISyntaxException;
+
+import static com.github.batkinson.jrsync.TestUtils.randomAccess;
+import static com.github.batkinson.jrsync.TestUtils.testFile;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class RollingChecksumTest {
@@ -73,4 +80,36 @@ public class RollingChecksumTest {
             }
         }
     }
+
+    @Test
+    public void recurrenceHolds() throws URISyntaxException, IOException {
+
+        int blockSize = 1;
+        RandomAccessFile testFile = randomAccess(testFile("guitar.jpg"));
+        RollingChecksum rollSum = new RollingChecksum(blockSize), blockSum = new RollingChecksum(blockSize);
+
+        // Handle the first block directly
+        byte[] b = new byte[blockSize];
+        testFile.readFully(b);
+        rollSum.update(b);
+        blockSum.update(b);
+        assertEquals("first block checksum should match", blockSum.getValue(), rollSum.getValue());
+
+        // Roll through the file, confirm entire block sum matches the rolling sum for each offset
+        for (long bs = 1; testFile.getFilePointer() < testFile.length(); bs++) {
+
+            byte nextByte = testFile.readByte();
+            long newPos = testFile.getFilePointer();
+            testFile.seek(bs);
+            testFile.readFully(b);
+            assertEquals("last byte of block read should match next sequential byte", nextByte, b[b.length - 1]);
+
+            rollSum.update(nextByte);
+            blockSum.reset();
+            blockSum.update(b);
+            assertEquals("recurrence relationship should hold", blockSum.getValue(), rollSum.getValue());
+            testFile.seek(newPos);
+        }
+    }
+
 }
