@@ -43,7 +43,7 @@ public class IOUtil {
      * @return wrapped stream
      */
     public static InputStream buffer(InputStream in) {
-        return new BufferedInputStream(in);
+        return new BufferedInputStream(in, BUFFER_SIZE);
     }
 
     /**
@@ -53,7 +53,7 @@ public class IOUtil {
      * @return wrapped stream
      */
     public static OutputStream buffer(OutputStream out) {
-        return new BufferedOutputStream(out);
+        return new BufferedOutputStream(out, BUFFER_SIZE);
     }
 
     /**
