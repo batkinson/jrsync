@@ -112,12 +112,10 @@ public class ZSync {
         try {
             if (analyzer.remoteBytes() > 0) {
                 req = requestFactory.create();
-                req.setHeader(RANGE_HEADER, "bytes=" +
-                        toRangeString(analyzer.getRemoteRanges()));
+                req.setHeader(RANGE_HEADER, "bytes=" + toRangeString(analyzer.getRemoteRanges()));
 
                 int status = req.getResponseCode();
-                String contentType = req.getContentType(),
-                        contentRange = req.getHeader(CONTENT_RANGE_HEADER);
+                String contentType = req.getContentType(), contentRange = req.getHeader(CONTENT_RANGE_HEADER);
                 InputStream bodyIn = req.getInputStream();
 
                 if (status != SC_PARTIAL_CONTENT)
