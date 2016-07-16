@@ -80,6 +80,12 @@ public class BlockSearch {
         return blockDescs.containsKey(checksum) ? blockDescs.get(checksum) : EMPTY_LIST;
     }
 
+    private void unmatched(SearchHandler handler, long start, long end) throws IOException {
+        if (start < end) {
+            handler.unmatched(start, end);
+        }
+    }
+
     /**
      * Performs an rsync block search on the target file, attempting to match
      * blocks in block summary specified when the search was created. Handler
@@ -153,12 +159,6 @@ public class BlockSearch {
                 unmatched(handler, interimStart, targetLength);
                 return;
             }
-        }
-    }
-
-    private void unmatched(SearchHandler handler, long start, long end) throws IOException {
-        if (start < end) {
-            handler.unmatched(start, end);
         }
     }
 
