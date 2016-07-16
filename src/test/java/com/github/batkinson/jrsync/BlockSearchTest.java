@@ -76,6 +76,8 @@ public class BlockSearchTest {
     public void zsyncDifferentBlockSizes() throws IOException, NoSuchAlgorithmException {
         for (int blockSize : Arrays.asList(1, 13, (int) file1.length(), (int) file2.length(), 1100)) {
             assertSearch(blockSize, "zdbs", file1, file2, true);
+            file1.seek(0);
+            file2.seek(0);
         }
     }
 
@@ -99,15 +101,14 @@ public class BlockSearchTest {
         assertSearch(10, "zpb", file6, file1, true);
     }
 
-
     private void assertSearch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target, boolean reverse) throws IOException, NoSuchAlgorithmException {
         final BlockSearch search = new BlockSearch(computeBlocks(reverse ? target : basis, blockSize, MD5), blockSize);
         File tempFile = File.createTempFile(name + "-" + blockSize + "-", "", outputDir);
         FilePatcher patcher = new FilePatcher(blockSize, basis, target, tempFile, reverse);
         if (reverse) {
-            search.zsyncSearch(basis, target.length(), MD5, patcher);
+            search.zsyncSearch(basis, basis.length(), target.length(), MD5, patcher);
         } else {
-            search.rsyncSearch(target, MD5, patcher);
+            search.rsyncSearch(target, target.length(), MD5, patcher);
         }
         assertArrayEquals(computeHash(target), computeHash(patcher.getDest()));
         assertEquals(target.length(), patcher.getBytesMatched() + patcher.getBytesNeeded());

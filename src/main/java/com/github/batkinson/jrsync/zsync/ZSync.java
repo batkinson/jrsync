@@ -5,14 +5,7 @@ import com.github.batkinson.jrsync.BlockSearch;
 import com.github.batkinson.jrsync.Metadata;
 import com.github.batkinson.jrsync.SearchHandler;
 
-import java.io.Closeable;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -78,7 +71,7 @@ public class ZSync {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
-    public static void sync(Metadata metadata, RandomAccessFile basis, File target, RangeRequestFactory requestFactory)
+    public static void sync(Metadata metadata, File basis, File target, RangeRequestFactory requestFactory)
             throws IOException, NoSuchAlgorithmException {
         sync(metadata, basis, target, requestFactory, null);
     }
@@ -96,20 +89,23 @@ public class ZSync {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
-    public static void sync(Metadata metadata, RandomAccessFile basis, File target,
-                            RangeRequestFactory requestFactory, ProgressTracker tracker)
-            throws NoSuchAlgorithmException, IOException {
+    public static void sync(Metadata metadata, File basis, File target, RangeRequestFactory requestFactory,
+                            ProgressTracker tracker) throws NoSuchAlgorithmException, IOException {
 
         MessageDigest digest = MessageDigest.getInstance(metadata.getFileHashAlg());
-        DigestOutputStream digestOut = new DigestOutputStream(
-                buffer(new FileOutputStream(target)), digest);
+        DigestOutputStream digestOut = new DigestOutputStream(buffer(new FileOutputStream(target)), digest);
 
         // Perform block search for remote content in local file
         BlockSearch search = new BlockSearch(metadata.getBlockDescs(), metadata.getBlockSize());
         Analyzer analyzer = new Analyzer(metadata);
         if (tracker != null)
             analyzer.setTracker(tracker);
-        search.zsyncSearch(basis, metadata.getFileSize(), metadata.getBlockHashAlg(), analyzer);
+        DataInputStream searchInput = new DataInputStream(buffer(new FileInputStream(basis)));
+        try {
+            search.zsyncSearch(searchInput, basis.length(), metadata.getFileSize(), metadata.getBlockHashAlg(), analyzer);
+        } finally {
+            searchInput.close();
+        }
 
         RangeRequest req = null;
         RangeStream input = null;
@@ -136,7 +132,12 @@ public class ZSync {
                     throw new RuntimeException("expected http range content for single or multiple ranges");
             }
 
-            buildFile(metadata, basis, analyzer.getMatches(), input, digestOut, tracker);
+            RandomAccessFile randomAccessBasis = new RandomAccessFile(basis, "r");
+            try {
+                buildFile(metadata, randomAccessBasis, analyzer.getMatches(), input, digestOut, tracker);
+            } finally {
+                randomAccessBasis.close();
+            }
 
         } finally {
             close(input, req, digestOut);

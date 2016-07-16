@@ -1,8 +1,6 @@
 package com.github.batkinson.jrsync;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -55,20 +53,19 @@ public class BlockSearch {
      * so it is possible to handle the file in a single, serial pass.
      *
      * @param target          the file to generate using bytes from basis summary
+     * @param targetLength    the length of the file to generate in bytes
      * @param digestAlgorithm hash algorithm to use for block equality
      * @param handler         the object that handles search output
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    public void rsyncSearch(RandomAccessFile target, String digestAlgorithm, SearchHandler handler) throws IOException, NoSuchAlgorithmException {
+    public void rsyncSearch(DataInput target, long targetLength, String digestAlgorithm, SearchHandler handler)
+            throws IOException, NoSuchAlgorithmException {
 
         Map<Long, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
         long interimStart = 0;
-        long targetLength = target.length();
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
-
-        target.seek(interimStart);
 
         // Load a block from file
         byte[] blockBuf = new byte[blockSize];
@@ -106,7 +103,7 @@ public class BlockSearch {
                     handler.matched(sb.position(), match);
                     interimStart = nextStart;
                     // advance buffer to be at block's end
-                    if (nextStart <= target.length()) {
+                    if (nextStart <= targetLength) {
                         target.readFully(blockBuf);
                         sb.add(blockBuf);
                     }
@@ -117,7 +114,7 @@ public class BlockSearch {
                 }
             } catch (EOFException eof) {
                 searched(handler, targetLength, targetLength);
-                unmatched(handler, interimStart, target.length());
+                unmatched(handler, interimStart, targetLength);
                 return;
             }
         }
@@ -140,13 +137,14 @@ public class BlockSearch {
      * byte order. Matches are handled in order, then unmatched content in order.
      *
      * @param basis           the local file used to build remote target
+     * @param basisLength     size of the basis file in bytes
      * @param targetLength    size of the file to construct in bytes, used to handle trailing content
      * @param digestAlgorithm hash algorithm to use for block equality
      * @param handler         the object that handles search output
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    public void zsyncSearch(RandomAccessFile basis, long targetLength, String digestAlgorithm, SearchHandler handler) throws IOException, NoSuchAlgorithmException {
+    public void zsyncSearch(DataInput basis, long basisLength, long targetLength, String digestAlgorithm, SearchHandler handler) throws IOException, NoSuchAlgorithmException {
 
         // Modifiable so we can eliminate matched blocks as we go
         Map<Long, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
@@ -154,10 +152,7 @@ public class BlockSearch {
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
 
-        long basisLength = basis.length();
         long matchedBlocks = 0;
-
-        basis.seek(0);
 
         try {
             // Load first block

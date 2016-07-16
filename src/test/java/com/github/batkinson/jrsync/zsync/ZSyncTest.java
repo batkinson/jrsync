@@ -30,7 +30,7 @@ public class ZSyncTest {
     private TestRangeRequestFactory factory;
 
     File outputDir;
-    RandomAccessFile file1, file6;
+    File file1, file6;
     Metadata file1Single, file1Multiple, file1Uneven,
             file3Leading, file4Internal, file5Multiple;
 
@@ -40,8 +40,8 @@ public class ZSyncTest {
         outputDir = new File(System.getProperty("outputDir"), "zsync-files");
         outputDir.mkdirs();
 
-        file1 = randomAccess(testFile("file1.txt"));
-        file6 = randomAccess(testFile("file6.txt"));
+        file1 = testFile("file1.txt");
+        file6 = testFile("file6.txt");
 
         file1Single = Metadata.read(randomAccess(testFile("file1.jrsmd")));
         file1Multiple = Metadata.read(randomAccess(testFile("file1-bs10.jrsmd")));
@@ -51,11 +51,6 @@ public class ZSyncTest {
         file5Multiple = Metadata.read(randomAccess(testFile("file5.jrsmd")));
 
         factory = new TestRangeRequestFactory(null);
-    }
-
-    @After
-    public void tearDown() {
-        close(file1, file6);
     }
 
     @Test
