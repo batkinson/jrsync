@@ -27,14 +27,48 @@ public class BlockSearch {
         this.blockSummary = basisDesc;
     }
 
-    private Map<Long, Collection<BlockDesc>> buildMatchTable(List<BlockDesc> blocks) {
-        Map<Long, Collection<BlockDesc>> result = new HashMap<>();
+    /**
+     * A flyweight used to avoid memory allocations due to auto-boxing. The match table {@link Map} requires boxed
+     * {@link Long} keys for finding matches and though {@link Long} does provide a cache it is only used for small
+     * values. Since the worst case can require a lookup for every byte in the file if no matching blocks are found,
+     * at least one new object would be allocated for every byte in the basis file. For large files, this can make a
+     * huge difference in search performance.
+     *
+     * <strong>
+     *     Never share or modify a flyweight instance while it is used as a key in the match table, since this violates
+     *     the contract for the collections and will result in undefined semantics.
+     * </strong>
+     */
+    private static final class FlyweightLong {
+
+        long value;
+
+        FlyweightLong() { }
+
+        FlyweightLong(long v) {
+            value = v;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o != null && o instanceof FlyweightLong && value == ((FlyweightLong) o).value;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (value ^ (value >>> 32));
+        }
+    }
+
+    private Map<FlyweightLong, Collection<BlockDesc>> buildMatchTable(List<BlockDesc> blocks) {
+        Map<FlyweightLong, Collection<BlockDesc>> result = new HashMap<>();
         if (blocks != null) {
             for (BlockDesc desc : blocks) {
-                Collection<BlockDesc> checksumHits = result.get(desc.weakChecksum);
+                FlyweightLong blockSum = new FlyweightLong(desc.weakChecksum);
+                Collection<BlockDesc> checksumHits = result.get(blockSum);
                 if (checksumHits == null) {
                     checksumHits = new LinkedHashSet<>();
-                    result.put(desc.weakChecksum, checksumHits);
+                    result.put(blockSum, checksumHits);
                 }
                 checksumHits.add(desc);
             }
@@ -42,7 +76,7 @@ public class BlockSearch {
         return result;
     }
 
-    private Collection<BlockDesc> checksumMatches(Map<Long, Collection<BlockDesc>> blockDescs, long checksum) {
+    private Collection<BlockDesc> checksumMatches(Map<FlyweightLong, Collection<BlockDesc>> blockDescs, FlyweightLong checksum) {
         return blockDescs.containsKey(checksum) ? blockDescs.get(checksum) : EMPTY_LIST;
     }
 
@@ -62,7 +96,8 @@ public class BlockSearch {
     public void rsyncSearch(DataInput target, long targetLength, String digestAlgorithm, SearchHandler handler)
             throws IOException, NoSuchAlgorithmException {
 
-        Map<Long, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
+        Map<FlyweightLong, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
+        FlyweightLong checksum = new FlyweightLong();
         long interimStart = 0;
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
@@ -80,7 +115,8 @@ public class BlockSearch {
         while (true) {
 
             BlockDesc match = null;
-            Collection<BlockDesc> candidates = checksumMatches(blockTable, sb.checksum());
+            checksum.value = sb.checksum();
+            Collection<BlockDesc> candidates = checksumMatches(blockTable, checksum);
             if (!candidates.isEmpty()) {
                 byte[] contentHash = digest.digest(sb.getBlock(blockBuf));
                 for (BlockDesc candidate : candidates) {
@@ -147,7 +183,8 @@ public class BlockSearch {
     public void zsyncSearch(DataInput basis, long basisLength, long targetLength, String digestAlgorithm, SearchHandler handler) throws IOException, NoSuchAlgorithmException {
 
         // Modifiable so we can eliminate matched blocks as we go
-        Map<Long, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
+        Map<FlyweightLong, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
+        FlyweightLong checksum = new FlyweightLong();
 
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
@@ -164,7 +201,8 @@ public class BlockSearch {
             while (matchedBlocks < blockSummary.size()) {
 
                 boolean blockMatched = false;
-                Collection<BlockDesc> candidates = checksumMatches(blockTable, sb.checksum());
+                checksum.value = sb.checksum();
+                Collection<BlockDesc> candidates = checksumMatches(blockTable, checksum);
                 if (!candidates.isEmpty()) {
                     byte[] contentHash = digest.digest(sb.getBlock(blockBuf));
                     Iterator<BlockDesc> candidatesIter = candidates.iterator();
@@ -198,7 +236,8 @@ public class BlockSearch {
         // Scan block summary of target and notify handler of unmatched
         // Avoids O(n) when every block has same content by using sets
         for (BlockDesc d : blockSummary) {
-            if (checksumMatches(blockTable, d.weakChecksum).contains(d)) {
+            checksum.value = d.weakChecksum;
+            if (checksumMatches(blockTable, checksum).contains(d)) {
                 long blockOffset = d.blockIndex * blockSize;
                 unmatched(handler, blockOffset, blockOffset + blockSize);
             }
