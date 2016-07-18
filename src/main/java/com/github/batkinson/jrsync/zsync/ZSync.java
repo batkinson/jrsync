@@ -22,8 +22,11 @@ import static com.github.batkinson.jrsync.zsync.IOUtil.buffer;
 import static com.github.batkinson.jrsync.zsync.IOUtil.close;
 import static com.github.batkinson.jrsync.zsync.IOUtil.copy;
 import static com.github.batkinson.jrsync.zsync.Range.appendRange;
+import static com.github.batkinson.jrsync.zsync.Range.estimateStringLength;
 import static com.github.batkinson.jrsync.zsync.Range.toRangeString;
 import static com.github.batkinson.jrsync.zsync.ZSync.parseContentRange;
+import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_MAP;
 
 /**
  * Contains methods useful for implementing the zsync algorithm. By relying only
@@ -210,7 +213,6 @@ class Range {
         throw new RuntimeException("attempted to merge non-contiguous ranges");
     }
 
-
     /**
      * Adds the specified range to list, compacting into contiguous ranges.
      */
@@ -225,6 +227,41 @@ class Range {
             }
         }
         ranges.add(next);
+    }
+
+    private static final long[] DIGITS_LOOKUP = {
+            10L, 100L, 1000L, 10000L, 100000L, 1000000L, 10000000L, 100000000L, 1000000000L, 10000000000L,
+            100000000000L, 1000000000000L, 10000000000000L, 100000000000000L, 1000000000000000L, 10000000000000000L,
+            100000000000000000L, 1000000000000000000L
+    };
+
+    /**
+     * Returns the number of digits required to encode the value in a base 10 string.
+     *
+     * @param value non-negative integer
+     * @return number of digits to encode as base 10 string
+     */
+    public static long base10Digits(long value) {
+        for (int i = 0; i < DIGITS_LOOKUP.length; i++) {
+            if (value < DIGITS_LOOKUP[i])
+                return i + 1;
+        }
+        return DIGITS_LOOKUP.length + 1;
+    }
+
+    /**
+     * Returns an estimated length for the list of ranges encoded as a range string.
+     *
+     * @param ranges
+     * @return
+     */
+    public static long estimateStringLength(List<Range> ranges) {
+        long length = 0;
+        for (int i = 0; i < ranges.size(); i++) {
+            Range r = ranges.get(i);
+            length += base10Digits(r.first) + base10Digits(r.last) + (i == 0 ? 1 : 2);
+        }
+        return length;
     }
 
     /**
@@ -254,10 +291,13 @@ class Range {
  */
 class Analyzer implements SearchHandler {
 
+    private static final int RANGE_STRING_MAX_LENGTH = 3700;
+
     // Maps remote block index to offset of matching content in local file
     private final Map<Long, Long> matches = new HashMap<>();
     private final Metadata metadata;
     private final List<Range> required = new ArrayList<>();
+    private long rangeStringLength = -1;
     private ProgressTracker tracker;
 
     Analyzer(Metadata metadata) {
@@ -284,15 +324,22 @@ class Analyzer implements SearchHandler {
         appendRange(required, start, end - 1);
     }
 
+    private boolean isRangeStringTooLong() {
+        if (rangeStringLength < 0) {
+            rangeStringLength = estimateStringLength(required);
+        }
+        return rangeStringLength > RANGE_STRING_MAX_LENGTH;
+    }
+
     public Map<Long, Long> getMatches() {
-        return matches;
+        return isRangeStringTooLong() ? EMPTY_MAP : matches;
     }
 
     /**
      * The amount of remote content we can source locally.
      */
     public long localBytes() {
-        return metadata.getBlockSize() * matches.size();
+        return isRangeStringTooLong() ? 0 : metadata.getBlockSize() * matches.size();
     }
 
     /**
@@ -306,7 +353,7 @@ class Analyzer implements SearchHandler {
      * The minimal list of remote byte ranges required in ascending byte order.
      */
     public List<Range> getRemoteRanges() {
-        return required;
+        return isRangeStringTooLong() ? asList(new Range(0, metadata.getFileSize() - 1)) : required;
     }
 }
 
