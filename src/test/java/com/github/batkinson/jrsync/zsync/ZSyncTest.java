@@ -2,14 +2,12 @@ package com.github.batkinson.jrsync.zsync;
 
 import com.github.batkinson.jrsync.Metadata;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import java.util.Map;
 
 import static com.github.batkinson.jrsync.TestUtils.randomAccess;
 import static com.github.batkinson.jrsync.TestUtils.testFile;
-import static com.github.batkinson.jrsync.zsync.IOUtil.close;
 import static com.github.batkinson.jrsync.zsync.ZSync.SC_PARTIAL_CONTENT;
 import static com.github.batkinson.jrsync.zsync.ZSync.sync;
 import static org.junit.Assert.assertFalse;
