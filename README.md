@@ -1,6 +1,6 @@
 # JRsync
 
-[![Build Status](https://travis-ci.org/batkinson/JRsync.svg?branch=master)](https://travis-ci.org/batkinson/JRsync)
+[![Build Status](https://travis-ci.org/batkinson/jrsync.svg?branch=master)](https://travis-ci.org/batkinson/jrsync)
 [![Coverage Status](https://coveralls.io/repos/batkinson/JRsync/badge.svg?branch=master&service=github)](https://coveralls.io/github/batkinson/JRsync?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.batkinson/jrsync/badge.svg?style=flat)](http://mvnrepository.com/artifact/com.github.batkinson/jrsync)
 
