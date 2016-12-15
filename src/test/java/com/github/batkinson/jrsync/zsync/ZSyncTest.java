@@ -51,25 +51,25 @@ public class ZSyncTest {
     }
 
     @Test
-    public void trailingRange() throws IOException, NoSuchAlgorithmException {
+    public void trailingRange() throws IOException, NoSuchAlgorithmException, InterruptedException {
         setupResponse(SC_PARTIAL_CONTENT, "789\n", "Content-Range: bytes 996-999/1000");
         sync(file1Uneven, file1, tempFile("trail-rng"), factory);
     }
 
     @Test
-    public void leadingRange() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+    public void leadingRange() throws IOException, NoSuchAlgorithmException, URISyntaxException, InterruptedException {
         setupResponse(SC_PARTIAL_CONTENT, "456123789\n", "Content-Range: bytes 0-9/1000");
         sync(file3Leading, file1, tempFile("lead-rng"), factory);
     }
 
     @Test
-    public void internalRange() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+    public void internalRange() throws IOException, NoSuchAlgorithmException, URISyntaxException, InterruptedException {
         setupResponse(SC_PARTIAL_CONTENT, "12345FUN SOCIETY789\n", "Content-Range: bytes 180-199/1000");
         sync(file4Internal, file1, tempFile("internal-rng"), factory);
     }
 
     @Test
-    public void multipleRanges() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+    public void multipleRanges() throws IOException, NoSuchAlgorithmException, URISyntaxException, InterruptedException {
         String multipartContent =
                 "\r\n--EOR\r\nContent-Type: text/plain\r\nContent-Range: bytes 0-9/1000\r\n\r\n*23456789\n" +
                         "\n--EOR\nContent-Type: text/plain\nContent-Range: bytes 480-489/1000\n\n123**6789\n" +
@@ -80,7 +80,7 @@ public class ZSyncTest {
     }
 
     @Test
-    public void exactSingleBlock() throws IOException, NoSuchAlgorithmException {
+    public void exactSingleBlock() throws IOException, NoSuchAlgorithmException, InterruptedException {
         sync(file1Single, file1, tempFile("exact-sb"), factory);
     }
 
@@ -111,19 +111,19 @@ public class ZSyncTest {
     }
 
     @Test
-    public void exactMultipleBlocks() throws IOException, NoSuchAlgorithmException {
+    public void exactMultipleBlocks() throws IOException, NoSuchAlgorithmException, InterruptedException {
         sync(file1Multiple, file1, tempFile("exact-mb"), factory);
     }
 
     @Test
-    public void progressTracker() throws IOException, NoSuchAlgorithmException {
+    public void progressTracker() throws IOException, NoSuchAlgorithmException, InterruptedException {
         TestTracker tracker = new TestTracker();
         sync(file1Multiple, file1, tempFile("exact-mb"), factory, tracker);
         tracker.assertCorrect();
     }
 
     @Test
-    public void poisonByte() throws IOException, NoSuchAlgorithmException {
+    public void poisonByte() throws IOException, NoSuchAlgorithmException, InterruptedException {
         setupResponse(SC_PARTIAL_CONTENT, "987654321\n", "Content-Range: bytes 40-49/1000");
         sync(file1Multiple, file6, tempFile("poison-byte"), factory);
     }

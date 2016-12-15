@@ -51,29 +51,29 @@ public class BlockSearchTest {
     }
 
     @Test
-    public void rsyncDifferentBlockSizes() throws IOException, NoSuchAlgorithmException {
+    public void rsyncDifferentBlockSizes() throws IOException, NoSuchAlgorithmException, InterruptedException {
         for (int blockSize : Arrays.asList(1, 13, (int) file1.length(), (int) file2.length(), 1100)) {
             assertSearch(blockSize, "rdbs", file1, file2, false);
         }
     }
 
     @Test
-    public void rsyncBinaryBigToSmall() throws IOException, NoSuchAlgorithmException {
+    public void rsyncBinaryBigToSmall() throws IOException, NoSuchAlgorithmException, InterruptedException {
         assertSearch(191, "rbbts", violin, guitar, false);
     }
 
     @Test
-    public void rsyncBinarySmallToBig() throws IOException, NoSuchAlgorithmException {
+    public void rsyncBinarySmallToBig() throws IOException, NoSuchAlgorithmException, InterruptedException {
         assertSearch(191, "rbstb", guitar, violin, false);
     }
 
     @Test
-    public void rsyncBinaryIdentical() throws IOException, NoSuchAlgorithmException {
+    public void rsyncBinaryIdentical() throws IOException, NoSuchAlgorithmException, InterruptedException {
         assertSearch(191, "rbi", guitar, guitar, false);
     }
 
     @Test
-    public void zsyncDifferentBlockSizes() throws IOException, NoSuchAlgorithmException {
+    public void zsyncDifferentBlockSizes() throws IOException, NoSuchAlgorithmException, InterruptedException {
         for (int blockSize : Arrays.asList(1, 13, (int) file1.length(), (int) file2.length(), 1100)) {
             assertSearch(blockSize, "zdbs", file1, file2, true);
             file1.seek(0);
@@ -82,26 +82,26 @@ public class BlockSearchTest {
     }
 
     @Test
-    public void zsyncBinaryBigToSmall() throws IOException, NoSuchAlgorithmException {
+    public void zsyncBinaryBigToSmall() throws IOException, NoSuchAlgorithmException, InterruptedException {
         assertSearch(191, "zbbts", violin, guitar, true);
     }
 
     @Test
-    public void zsyncBinarySmallToBig() throws IOException, NoSuchAlgorithmException {
+    public void zsyncBinarySmallToBig() throws IOException, NoSuchAlgorithmException, InterruptedException {
         assertSearch(191, "zbstb", guitar, violin, true);
     }
 
     @Test
-    public void zsyncBinaryIdentical() throws IOException, NoSuchAlgorithmException {
+    public void zsyncBinaryIdentical() throws IOException, NoSuchAlgorithmException, InterruptedException {
         assertSearch(191, "zbi", guitar, guitar, true);
     }
 
     @Test
-    public void zsyncPoisonByte() throws IOException, NoSuchAlgorithmException {
+    public void zsyncPoisonByte() throws IOException, NoSuchAlgorithmException, InterruptedException {
         assertSearch(10, "zpb", file6, file1, true);
     }
 
-    private void assertSearch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target, boolean reverse) throws IOException, NoSuchAlgorithmException {
+    private void assertSearch(int blockSize, String name, RandomAccessFile basis, RandomAccessFile target, boolean reverse) throws IOException, NoSuchAlgorithmException, InterruptedException {
         final BlockSearch search = new BlockSearch(computeBlocks(reverse ? target : basis, blockSize, MD5), blockSize);
         File tempFile = File.createTempFile(name + "-" + blockSize + "-", "", outputDir);
         FilePatcher patcher = new FilePatcher(blockSize, basis, target, tempFile, reverse);

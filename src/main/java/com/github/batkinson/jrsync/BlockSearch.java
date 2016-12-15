@@ -98,9 +98,10 @@ public class BlockSearch {
      * @param handler         the object that handles search output
      * @throws IOException
      * @throws NoSuchAlgorithmException
+     * @throws InterruptedException
      */
     public void rsyncSearch(DataInput target, long targetLength, String digestAlgorithm, SearchHandler handler)
-            throws IOException, NoSuchAlgorithmException {
+            throws IOException, NoSuchAlgorithmException, InterruptedException {
 
         Map<FlyweightLong, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
         FlyweightLong checksum = new FlyweightLong();
@@ -119,6 +120,10 @@ public class BlockSearch {
         }
 
         while (true) {
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
 
             BlockDesc match = null;
             checksum.value = sb.checksum();
@@ -179,8 +184,9 @@ public class BlockSearch {
      * @param handler         the object that handles search output
      * @throws IOException
      * @throws NoSuchAlgorithmException
+     * @throws InterruptedException
      */
-    public void zsyncSearch(DataInput basis, long basisLength, long targetLength, String digestAlgorithm, SearchHandler handler) throws IOException, NoSuchAlgorithmException {
+    public void zsyncSearch(DataInput basis, long basisLength, long targetLength, String digestAlgorithm, SearchHandler handler) throws IOException, NoSuchAlgorithmException, InterruptedException {
 
         // Modifiable so we can eliminate matched blocks as we go
         Map<FlyweightLong, Collection<BlockDesc>> blockTable = buildMatchTable(blockSummary);
@@ -199,6 +205,10 @@ public class BlockSearch {
 
             // Test all block offsets, starting with first block
             while (matchedBlocks < blockSummary.size()) {
+
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
 
                 boolean blockMatched = false;
                 checksum.value = sb.checksum();

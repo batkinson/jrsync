@@ -75,7 +75,7 @@ public class ZSync {
      * @throws IOException
      */
     public static void sync(Metadata metadata, File basis, File target, RangeRequestFactory requestFactory)
-            throws IOException, NoSuchAlgorithmException {
+            throws IOException, NoSuchAlgorithmException, InterruptedException {
         sync(metadata, basis, target, requestFactory, null);
     }
 
@@ -91,9 +91,10 @@ public class ZSync {
      * @param tracker        event handler for progress updates, null for no tracking
      * @throws NoSuchAlgorithmException
      * @throws IOException
+     * @throws InterruptedException
      */
     public static void sync(Metadata metadata, File basis, File target, RangeRequestFactory requestFactory,
-                            ProgressTracker tracker) throws NoSuchAlgorithmException, IOException {
+                            ProgressTracker tracker) throws NoSuchAlgorithmException, IOException, InterruptedException {
 
         MessageDigest digest = MessageDigest.getInstance(metadata.getFileHashAlg());
         DigestOutputStream digestOut = new DigestOutputStream(buffer(new FileOutputStream(target)), digest);
@@ -155,7 +156,7 @@ public class ZSync {
      * requested. It also does *not* close the basis file.
      */
     static void buildFile(Metadata metadata, RandomAccessFile basis, Map<Long, Long> matches, RangeStream remoteInput,
-                          OutputStream output, ProgressTracker tracker) throws IOException {
+                          OutputStream output, ProgressTracker tracker) throws IOException, InterruptedException {
         if (remoteInput == null)
             remoteInput = new EmptyRangeStream();
         BlockReadable localInput = new RandomAccessBlockReadable(basis);
@@ -163,6 +164,11 @@ public class ZSync {
         long offset = 0, targetSize = metadata.getFileSize();
         Range nextRange;
         while (offset < targetSize) {
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
+
             if (tracker != null) {
                 tracker.onProgress(ProgressTracker.Stage.BUILD, (int) ((double) offset / (targetSize == 0 ? 1 : targetSize) * 100));
             }
