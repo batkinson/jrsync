@@ -11,7 +11,7 @@
 
     <name>JRsync</name>
     <description>
-        A minimial android-compatible synchronization tool for transferring files. It is based on
+        A minimal android-compatible synchronization tool for transferring files. It is based on
         the rsync algorithm, not the rsync command, to utilize minimal dependencies.
     </description>
     <url>https://github.com/batkinson/JRsync</url>
