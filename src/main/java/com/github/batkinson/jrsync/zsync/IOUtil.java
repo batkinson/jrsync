@@ -14,6 +14,10 @@ public class IOUtil {
 
     public static final int BUFFER_SIZE = 8192;
 
+    interface CopyListener {
+        void copied(int bytes);
+    }
+
     /**
      * Streams the contents of the supplied {@link BlockReadable} object to the
      * supplied {@link OutputStream}, stopping once the specified number of
@@ -22,10 +26,11 @@ public class IOUtil {
      * @param in    readable to read from
      * @param out   stream to write to
      * @param count number of bytes to copy
+     * @param listener event handler to tracking copy during long loop, or null
      * @throws IOException
      * @throws InterruptedException
      */
-    static void copy(BlockReadable in, OutputStream out, int count) throws IOException, InterruptedException {
+    static void copy(BlockReadable in, OutputStream out, int count, CopyListener listener) throws IOException, InterruptedException {
         byte[] buf = new byte[BUFFER_SIZE];
         int remaining = count;
         while (remaining > 0) {
@@ -39,6 +44,10 @@ public class IOUtil {
                 throw new IOException("failed to read content, end of stream");
             out.write(buf, 0, read);
             remaining -= read;
+
+            if (listener != null) {
+                listener.copied(read);
+            }
         }
     }
 

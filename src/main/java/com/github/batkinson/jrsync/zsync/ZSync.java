@@ -151,6 +151,31 @@ public class ZSync {
     }
 
     /**
+     * Implements a {@link CopyTracker} that automatically reports sync progress using a {@link ProgressTracker}.
+     */
+    static class CopyTracker implements IOUtil.CopyListener {
+
+        ProgressTracker tracker;
+        long fileSize, copied;
+        int fileProgress;
+
+        CopyTracker(ProgressTracker tracker, long fileSize) {
+            this.tracker = tracker;
+            this.fileSize = fileSize;
+        }
+
+        @Override
+        public void copied(int bytes) {
+            copied += bytes;
+            int nextValue = fileSize <= 0 ? 100 : (int) ((((double) copied) / fileSize) * 100);
+            if (tracker != null && nextValue != fileProgress) {
+                tracker.onProgress(ProgressTracker.Stage.BUILD, fileProgress);
+            }
+            fileProgress = nextValue;
+        }
+    }
+
+    /**
      * Constructs a file from matching local content and multiple ranges of
      * remote content. It assumes the server will return ranges in order
      * requested. It also does *not* close the basis file.
@@ -162,6 +187,7 @@ public class ZSync {
         BlockReadable localInput = new RandomAccessBlockReadable(basis);
         int blockSize = metadata.getBlockSize();
         long offset = 0, targetSize = metadata.getFileSize();
+        CopyTracker copyTracker = new CopyTracker(tracker, targetSize);
         Range nextRange;
         while (offset < targetSize) {
 
@@ -169,16 +195,13 @@ public class ZSync {
                 throw new InterruptedException();
             }
 
-            if (tracker != null) {
-                tracker.onProgress(ProgressTracker.Stage.BUILD, (int) ((double) offset / (targetSize == 0 ? 1 : targetSize) * 100));
-            }
             if (matches.containsKey(offset)) {
                 basis.seek(matches.get(offset));
-                copy(localInput, output, blockSize);
+                copy(localInput, output, blockSize, copyTracker);
                 offset += blockSize;
             } else if ((nextRange = remoteInput.next()) != null && offset == nextRange.first) {
                 int rangeLength = (int) (nextRange.last - nextRange.first) + 1;
-                copy(remoteInput, output, rangeLength);
+                copy(remoteInput, output, rangeLength, copyTracker);
                 offset += rangeLength;
             } else
                 throw new RuntimeException("no content for offset: " + offset);
