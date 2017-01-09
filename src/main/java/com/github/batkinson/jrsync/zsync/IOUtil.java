@@ -23,11 +23,17 @@ public class IOUtil {
      * @param out   stream to write to
      * @param count number of bytes to copy
      * @throws IOException
+     * @throws InterruptedException
      */
-    static void copy(BlockReadable in, OutputStream out, int count) throws IOException {
+    static void copy(BlockReadable in, OutputStream out, int count) throws IOException, InterruptedException {
         byte[] buf = new byte[BUFFER_SIZE];
         int remaining = count;
         while (remaining > 0) {
+
+            if (Thread.interrupted()) {
+                 throw new InterruptedException();
+            }
+
             int read = in.read(buf, 0, Math.min(remaining, buf.length));
             if (read < 0)
                 throw new IOException("failed to read content, end of stream");
