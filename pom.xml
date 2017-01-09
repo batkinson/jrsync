@@ -7,7 +7,7 @@
 
     <groupId>com.github.batkinson</groupId>
     <artifactId>jrsync</artifactId>
-    <version>1.3</version>
+    <version>1.4-SNAPSHOT</version>
 
     <name>JRsync</name>
     <description>
