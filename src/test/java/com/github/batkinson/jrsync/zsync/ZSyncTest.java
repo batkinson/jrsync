@@ -93,21 +93,6 @@ public class ZSyncTest {
                 calls.put(stage, new ArrayList<Integer>());
             calls.get(stage).add(percentComplete);
         }
-
-        void assertCorrect() {
-            for (ProgressTracker.Stage stage : ProgressTracker.Stage.values()) {
-                List<Integer> calls = this.calls.get(stage);
-                assertTrue("expected multiple progress calls", calls.size() > 1);
-                boolean valuesSame = true;
-                for (int i = 1; i < calls.size(); i++) {
-                    Integer v1 = calls.get(i - 1).intValue(), v2 = calls.get(i).intValue();
-                    assertTrue("expected progress never decreases", v2 >= v1);
-                    if (v1 != v2)
-                        valuesSame = false;
-                }
-                assertFalse("expected progress values aren't all the same", valuesSame);
-            }
-        }
     }
 
     @Test
@@ -119,7 +104,18 @@ public class ZSyncTest {
     public void progressTracker() throws IOException, NoSuchAlgorithmException, InterruptedException {
         TestTracker tracker = new TestTracker();
         sync(file1Multiple, file1, tempFile("exact-mb"), factory, tracker);
-        tracker.assertCorrect();
+        for (ProgressTracker.Stage stage : ProgressTracker.Stage.values()) {
+            List<Integer> calls = tracker.calls.get(stage);
+            assertTrue("expected multiple progress calls", calls.size() > 1);
+            boolean valuesSame = true;
+            for (int i = 1; i < calls.size(); i++) {
+                Integer v1 = calls.get(i - 1).intValue(), v2 = calls.get(i).intValue();
+                assertTrue("expected progress never decreases", v2 >= v1);
+                if (v1 != v2)
+                    valuesSame = false;
+            }
+            assertFalse("expected progress values aren't all the same", valuesSame);
+        }
     }
 
     @Test
