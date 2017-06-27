@@ -331,6 +331,7 @@ class Analyzer implements SearchHandler {
     private final List<Range> required = new ArrayList<>();
     private long rangeStringLength = -1;
     private ProgressTracker tracker;
+    private int lastProgress = -1;
 
     Analyzer(Metadata metadata) {
         this.metadata = metadata;
@@ -342,8 +343,10 @@ class Analyzer implements SearchHandler {
 
     @Override
     public void searched(int percent) throws IOException {
-        if (tracker != null)
+        if (tracker != null && percent != lastProgress) {
             tracker.onProgress(ProgressTracker.Stage.SEARCH, percent);
+            lastProgress = percent;
+        }
     }
 
     @Override

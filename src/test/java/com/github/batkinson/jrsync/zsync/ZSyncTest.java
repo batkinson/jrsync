@@ -110,7 +110,8 @@ public class ZSyncTest {
             boolean valuesSame = true;
             for (int i = 1; i < calls.size(); i++) {
                 Integer v1 = calls.get(i - 1).intValue(), v2 = calls.get(i).intValue();
-                assertTrue("expected progress never decreases", v2 >= v1);
+                assertTrue("expected progress never the same", v2 != v1);
+                assertTrue("expected progress never decreases", v2 > v1);
                 if (v1 != v2)
                     valuesSame = false;
             }
