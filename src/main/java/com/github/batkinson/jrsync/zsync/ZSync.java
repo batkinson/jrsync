@@ -169,7 +169,7 @@ public class ZSync {
             copied += bytes;
             int nextValue = fileSize <= 0 ? 100 : (int) ((((double) copied) / fileSize) * 100);
             if (tracker != null && nextValue != fileProgress) {
-                tracker.onProgress(ProgressTracker.Stage.BUILD, fileProgress);
+                tracker.onProgress(ProgressTracker.Stage.BUILD, nextValue);
             }
             fileProgress = nextValue;
         }
