@@ -109,6 +109,8 @@ public class BlockSearch {
         SearchBuffer sb = new SearchBuffer(blockSize);
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
 
+        handler.searched(0);
+
         // Load a block from file
         byte[] blockBuf = new byte[blockSize];
         try {
@@ -196,6 +198,8 @@ public class BlockSearch {
         MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
 
         long matchedBlocks = 0;
+
+        handler.searched(0);
 
         try {
             // Load first block
