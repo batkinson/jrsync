@@ -128,6 +128,15 @@ public class ZSyncTest {
     }
 
     @Test
+    public void copyTrackerReportsZeroPercent() {
+        TestTracker tracker = new TestTracker();
+        ZSync.CopyTracker copyTracker = new ZSync.CopyTracker(tracker, 100);
+        copyTracker.copied(0);
+        List<Integer> progressCalls = tracker.calls.get(ProgressTracker.Stage.BUILD);
+        assertTrue("expected 0% call", progressCalls.get(0) == 0);
+    }
+
+    @Test
     public void poisonByte() throws IOException, NoSuchAlgorithmException, InterruptedException {
         setupResponse(SC_PARTIAL_CONTENT, "987654321\n", "Content-Range: bytes 40-49/1000");
         sync(file1Multiple, file6, tempFile("poison-byte"), factory);

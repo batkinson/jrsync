@@ -157,7 +157,7 @@ public class ZSync {
 
         ProgressTracker tracker;
         long fileSize, copied;
-        int fileProgress;
+        int fileProgress = -1;
 
         CopyTracker(ProgressTracker tracker, long fileSize) {
             this.tracker = tracker;
@@ -189,6 +189,9 @@ public class ZSync {
         long offset = 0, targetSize = metadata.getFileSize();
         CopyTracker copyTracker = new CopyTracker(tracker, targetSize);
         Range nextRange;
+
+        copyTracker.copied(0);
+
         while (offset < targetSize) {
 
             if (Thread.interrupted()) {
