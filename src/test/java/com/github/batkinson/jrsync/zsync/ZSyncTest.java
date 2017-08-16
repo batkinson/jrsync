@@ -75,7 +75,7 @@ public class ZSyncTest {
                         "\n--EOR\nContent-Type: text/plain\nContent-Range: bytes 480-489/1000\n\n123**6789\n" +
                         "\n--EOR\nContent-Type: text/plain\nContent-Range: bytes 990-999/1000\n\n12345678*\n" +
                         "\n--EOR--";
-        setupResponse(SC_PARTIAL_CONTENT, multipartContent, "Content-Type: multipart/byteranges; boundary=EOR");
+        setupResponse(SC_PARTIAL_CONTENT, multipartContent, "Content-Type: multipart/byteranges; boundary=EOR;charset=UTF-8");
         sync(file5Multiple, file1, tempFile("mult-rng"), factory);
     }
 

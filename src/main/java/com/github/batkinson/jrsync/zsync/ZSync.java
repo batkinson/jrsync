@@ -503,7 +503,7 @@ class ContentRangeStream implements RangeStream {
  */
 class MultipartByteRangeInputStream extends InputStream implements RangeStream {
 
-    private static final Pattern BOUNDARY_PATTERN = Pattern.compile("boundary=(\\S+)");
+    private static final Pattern BOUNDARY_PATTERN = Pattern.compile("boundary=([-0-9a-zA-Z'()+_,./=?]{1,70})");
     private static final String CRLF = "\r\n", LF = "\n";
 
     private InputStream input;
