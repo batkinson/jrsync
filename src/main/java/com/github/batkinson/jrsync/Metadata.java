@@ -59,15 +59,15 @@ public class Metadata {
     /**
      * Utility for generating a metadata file for an input stream.
      */
-    public static void generate(String contentSource, int blockSize, String fileHashAlg, String blockHashAlg, InputStream source, File metadata) throws IOException, NoSuchAlgorithmException {
+    public static void generate(String contentSource, int blockSize, String fileHashAlg, String blockHashAlg, InputStream source, File metadata)
+            throws IOException, NoSuchAlgorithmException {
         InputStream in = new BufferedInputStream(source);
-        File metadataDir = metadata.getParentFile(), metadataFile;
-        try (MetadataInputWrapper out =
-                     new MetadataInputWrapper(in, contentSource, blockSize, fileHashAlg, blockHashAlg, metadataDir)) {
+        File generatedFile, metadataDir = metadata.getParentFile();
+        try (MetadataInputWrapper out = new MetadataInputWrapper(in, contentSource, blockSize, fileHashAlg, blockHashAlg, metadataDir)) {
             while (out.read() >= 0) ;
-            metadataFile = out.getMetadataFile();
+            generatedFile = out.getMetadataFile();
         }
-        metadataFile.renameTo(metadata);
+        generatedFile.renameTo(metadata);
     }
 
     /**
