@@ -60,13 +60,14 @@ public class Metadata {
      * Utility for generating a metadata file for an input stream.
      */
     public static void generate(String contentSource, int blockSize, String fileHashAlg, String blockHashAlg, InputStream source, File metadata) throws IOException, NoSuchAlgorithmException {
-        MetadataInputWrapper out = new MetadataInputWrapper(new BufferedInputStream(source), contentSource, blockSize, fileHashAlg, blockHashAlg);
-        try {
+        InputStream in = new BufferedInputStream(source);
+        File metadataDir = metadata.getParentFile(), metadataFile;
+        try (MetadataInputWrapper out =
+                     new MetadataInputWrapper(in, contentSource, blockSize, fileHashAlg, blockHashAlg, metadataDir)) {
             while (out.read() >= 0) ;
-        } finally {
-            out.close();
-            out.getMetadataFile().renameTo(metadata);
+            metadataFile = out.getMetadataFile();
         }
+        metadataFile.renameTo(metadata);
     }
 
     /**
